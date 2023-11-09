@@ -1,0 +1,29 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:whisper_cpp/whisper_cpp.dart';
+import 'package:whisper_cpp/whisper_cpp_platform_interface.dart';
+import 'package:whisper_cpp/whisper_cpp_method_channel.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class MockWhisperCppPlatform
+    with MockPlatformInterfaceMixin
+    implements WhisperCppPlatform {
+
+  @override
+  Future<String?> getPlatformVersion() => Future.value('42');
+}
+
+void main() {
+  final WhisperCppPlatform initialPlatform = WhisperCppPlatform.instance;
+
+  test('$MethodChannelWhisperCpp is the default instance', () {
+    expect(initialPlatform, isInstanceOf<MethodChannelWhisperCpp>());
+  });
+
+  test('getPlatformVersion', () async {
+    WhisperCpp whisperCppPlugin = WhisperCpp();
+    MockWhisperCppPlatform fakePlatform = MockWhisperCppPlatform();
+    WhisperCppPlatform.instance = fakePlatform;
+
+    expect(await whisperCppPlugin.getPlatformVersion(), '42');
+  });
+}
