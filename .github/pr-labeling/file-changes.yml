@@ -1,0 +1,29 @@
+automation:
+  - any: ['.github/**/*']
+  
+android:
+  - any: ['android/**/*']
+
+ios:
+  - any: ['ios/**/*']
+
+macos:
+  - any: ['macos/**/*']
+
+example:
+  - any: ['example/lib/**/*']
+
+android-example:
+  - any: ['example/android/**/*']
+
+ios-example:
+  - any: ['example/ios/**/*']
+
+macos-example:
+  - any: ['example/macos/**/*']
+
+library:
+  - any: ['lib/**/*']
+
+test:
+  - any: ['test/**/*']
