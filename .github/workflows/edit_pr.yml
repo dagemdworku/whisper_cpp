@@ -1,0 +1,20 @@
+name: Pull Request (Edited)
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  labeler:
+    name: Label the Pull Request File Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Label the Pull Request by file changes
+        uses: actions/labeler@v4
+        with:
+          configuration-path: .github/pr-labeling/file-changes.yml
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
