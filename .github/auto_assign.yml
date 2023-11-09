@@ -1,0 +1,7 @@
+addReviewers: true
+addAssignees: false
+
+reviewers:
+  - dagemdworku
+
+numberOfReviewers: 0

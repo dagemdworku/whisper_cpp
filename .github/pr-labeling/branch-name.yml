@@ -1,0 +1,5 @@
+feature: ['feature/*', 'feat/*']
+fix: ['fix/*']
+chore: ['chore/*', 'refactor/*']
+test: ['test/*']
+setup: ['setup/*']
