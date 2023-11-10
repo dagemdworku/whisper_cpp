@@ -11,7 +11,13 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
+  }
+
+  @override
+  Future<void> initialize() async {
+    return await methodChannel.invokeMethod<void>('initialize');
   }
 }
