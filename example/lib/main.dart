@@ -16,8 +16,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _whisperCppPlugin = WhisperCpp();
+
+  late StreamSubscription<bool> _isRecordingStreamSubscription;
+
+  String _platformVersion = 'Unknown';
+  bool _isRecording = false;
 
   @override
   void initState() {
@@ -52,22 +56,40 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             children: [
               Text('Running on: $_platformVersion\n'),
+              Text('Is Recording: $_isRecording\n'),
               ElevatedButton(
-                onPressed: () async {
-                  await _whisperCppPlugin.initialize();
-                },
+                onPressed: _initialize,
                 child: const Text('Initialize'),
               ),
               ElevatedButton(
                 onPressed: () async {
                   await _whisperCppPlugin.toggleRecord();
                 },
-                child: const Text('Toggle Record'),
+                child: Text(_isRecording ? 'Stop' : 'Start'),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _initialize() async {
+    await _whisperCppPlugin.initialize();
+    _registerIsRecordingChangeListener();
+  }
+
+  void _registerIsRecordingChangeListener() {
+    _isRecordingStreamSubscription =
+        WhisperCpp.isRecording.listen((bool event) {
+      _isRecording = event;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _isRecordingStreamSubscription.cancel();
+    super.dispose();
   }
 }
