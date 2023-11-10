@@ -20,4 +20,9 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   Future<void> initialize() async {
     return await methodChannel.invokeMethod<void>('initialize');
   }
+
+  @override
+  Future<void> toggleRecord() async {
+    return await methodChannel.invokeMethod<void>('toggleRecord');
+  }
 }
