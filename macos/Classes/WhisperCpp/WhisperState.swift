@@ -12,7 +12,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var messageLog = ""  // Log of messages for debugging and user feedback
     @Published var statusLog = ""  // Log of messages for debugging and user feedback
     
-    var whisperInitResult: WhisperInitResult?
+    var whisperConfig: WhisperConfig?
     
     private var whisperContext: WhisperContext?  // The context for the Whisper model
     private let recorder = Recorder()  // The audio recorder
@@ -38,7 +38,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     override init() {
         super.init()
         do {
-            self.whisperInitResult = try loadModel()
+            self.whisperConfig = try loadModel()
             canTranscribe = true
         } catch {
             print(error.localizedDescription)
@@ -47,11 +47,11 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     // Load the Whisper model
-    private func loadModel() throws -> WhisperInitResult? {
+    private func loadModel() throws -> WhisperConfig? {
         messageLog += "Loading model...\n"
         statusLog = "Loading model..."
         if let modelUrl {
-            let result: WhisperInitResult = try WhisperContext.createContext(path: modelUrl.path())
+            let result: WhisperConfig = try WhisperContext.createContext(path: modelUrl.path())
             whisperContext = result.whisperContext
             messageLog += "Loaded model \(modelUrl.lastPathComponent)\n"
             statusLog = "Loaded model \(modelUrl.lastPathComponent)"

@@ -41,12 +41,12 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         registerIsRecordingEventChannel(whisperState: whisperState!)
         registerStatusLogEventChannel(whisperState: whisperState!)
         
-        let whisperInitResultDict: [String: Any] = [
-            "modelConfig": whisperState!.whisperInitResult!.modelConfig.toDictionary(),
-            "computeConfig": whisperState!.whisperInitResult!.computeConfig.toDictionary()
+        let whisperConfigDict: [String: Any] = [
+            "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
+            "computeConfig": whisperState!.whisperConfig!.computeConfig.toDictionary()
         ]
         
-        result(whisperInitResultDict)
+        result(whisperConfigDict)
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {

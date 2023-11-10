@@ -3155,9 +3155,9 @@ struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loa
     return ctx;
 }
 
-struct whisper_init_result * _whisper_init(whisper_context * ctx, whisper_init_result* result) {
+struct whisper_config * _whisper_init(whisper_context * ctx, whisper_config* result) {
     if (!ctx) {
-        whisper_init_result* result = new whisper_init_result;
+        whisper_config* result = new whisper_config;
         result->context = nullptr;
         return result;
     }
@@ -3174,20 +3174,20 @@ struct whisper_init_result * _whisper_init(whisper_context * ctx, whisper_init_r
     return result;
 }
 
-struct whisper_init_result * whisper_init_from_file(const char * path_model) {
-    whisper_init_result* result = new whisper_init_result;
+struct whisper_config * whisper_init_from_file(const char * path_model) {
+    whisper_config* result = new whisper_config;
     whisper_context * ctx = whisper_init_from_file_no_state(path_model, &result->model_config);
     return _whisper_init(ctx, result);
 }
 
-struct whisper_init_result * whisper_init_from_buffer(void * buffer, size_t buffer_size) {
-    whisper_init_result* result = new whisper_init_result;
+struct whisper_config * whisper_init_from_buffer(void * buffer, size_t buffer_size) {
+    whisper_config* result = new whisper_config;
     whisper_context * ctx = whisper_init_from_buffer_no_state(buffer, buffer_size, &result->model_config);
     return _whisper_init(ctx, result);
 }
 
-struct whisper_init_result * whisper_init(struct whisper_model_loader * loader) {
-    whisper_init_result* result = new whisper_init_result;
+struct whisper_config * whisper_init(struct whisper_model_loader * loader) {
+    whisper_config* result = new whisper_config;
     whisper_context * ctx = whisper_init_no_state(loader, &result->model_config);
     return _whisper_init(ctx, result);
 }

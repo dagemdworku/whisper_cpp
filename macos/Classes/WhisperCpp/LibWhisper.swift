@@ -103,21 +103,21 @@ actor WhisperContext {
     
     // Static function to create a new WhisperContext
     // Throws an error if the context could not be initialized
-    static func createContext(path: String) throws -> WhisperInitResult {
+    static func createContext(path: String) throws -> WhisperConfig {
         guard let resultOpaquePtr = whisper_init_from_file(path) else {
             print("Couldn't load model at \(path)")
             throw WhisperError.couldNotInitializeContext
         }
         
         let resultPtr = UnsafeMutableRawPointer(resultOpaquePtr)
-            .assumingMemoryBound(to: whisper_init_result.self)
+            .assumingMemoryBound(to: whisper_config.self)
         let result = resultPtr.pointee
         
         let context: OpaquePointer = result.context
         let modelConfig = WhisperModelConfig(model_config: result.model_config)
         let computeConfig = WhisperComputeConfig(compute_config: result.compute_config)
         
-        return WhisperInitResult(
+        return WhisperConfig(
             context: context,
             whisperContext:  WhisperContext(context: context),
             modelConfig: modelConfig,

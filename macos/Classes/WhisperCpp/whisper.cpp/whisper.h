@@ -116,11 +116,11 @@ extern "C" {
         float compute_buffer_decode;
     } whisper_compute_config;
 
-    typedef struct whisper_init_result {
+    typedef struct whisper_config {
         struct whisper_context * context;
         whisper_model_config model_config;
         whisper_compute_config compute_config;
-    } whisper_init_result;
+    } whisper_config;
 
     typedef struct whisper_model_loader {
         void * context;
@@ -133,9 +133,9 @@ extern "C" {
     // Various functions for loading a ggml whisper model.
     // Allocate (almost) all memory needed for the model.
     // Return NULL on failure
-    WHISPER_API struct whisper_init_result * whisper_init_from_file(const char * path_model);
-    WHISPER_API struct whisper_init_result * whisper_init_from_buffer(void * buffer, size_t buffer_size);
-    WHISPER_API struct whisper_init_result * whisper_init(struct whisper_model_loader * loader);
+    WHISPER_API struct whisper_config * whisper_init_from_file(const char * path_model);
+    WHISPER_API struct whisper_config * whisper_init_from_buffer(void * buffer, size_t buffer_size);
+    WHISPER_API struct whisper_config * whisper_init(struct whisper_model_loader * loader);
 
     // These are the same as the above, but the internal state of the context is not allocated automatically
     // It is the responsibility of the caller to allocate the state using whisper_init_state() (#523)
