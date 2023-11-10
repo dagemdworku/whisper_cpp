@@ -4403,7 +4403,9 @@ int whisper_full_with_state(
           struct whisper_state * state,
     struct whisper_full_params   params,
                    const float * samples,
-                           int   n_samples) {
+                           int   n_samples,
+                            whisper_transcription_log_callback log_callback
+                            ) {
     // clear old results
     auto & result_all = state->result_all;
 
@@ -4995,6 +4997,8 @@ int whisper_full_with_state(
 
             WHISPER_PRINT_DEBUG("\n%s: failed to decode with temperature = %.2f\n", __func__, t_cur);
         }
+        
+        
 
         // output results through a user-provided callback
         {
@@ -5048,6 +5052,7 @@ int whisper_full_with_state(
                             if (params.print_realtime) {
                                 if (params.print_timestamps) {
                                     printf("[%s --> %s]  %s\n", to_timestamp(tt0).c_str(), to_timestamp(tt1).c_str(), text.c_str());
+                                    log_callback(text.c_str());
                                 } else {
                                     printf("%s", text.c_str());
                                     fflush(stdout);
@@ -5136,8 +5141,9 @@ int whisper_full(
         struct whisper_context * ctx,
     struct whisper_full_params   params,
                    const float * samples,
-                           int   n_samples) {
-    return whisper_full_with_state(ctx, ctx->state, params, samples, n_samples);
+                           int   n_samples,
+                 whisper_transcription_log_callback log_callback) {
+    return whisper_full_with_state(ctx, ctx->state, params, samples, n_samples, log_callback);
 }
 
 int whisper_full_parallel(
@@ -5145,9 +5151,10 @@ int whisper_full_parallel(
         struct whisper_full_params params,
         const float * samples,
         int n_samples,
-        int n_processors) {
+        int n_processors,
+                          whisper_transcription_log_callback log_callback) {
     if (n_processors == 1) {
-        return whisper_full(ctx, params, samples, n_samples);
+        return whisper_full(ctx, params, samples, n_samples,log_callback);
     }
     int ret = 0;
 
@@ -5180,7 +5187,7 @@ int whisper_full_parallel(
         params_cur.progress_callback = nullptr;
         params_cur.progress_callback_user_data = nullptr;
 
-        workers[i] = std::thread(whisper_full_with_state, ctx, states[i], std::move(params_cur), samples + start_samples, n_samples_cur);
+        workers[i] = std::thread(whisper_full_with_state, ctx, states[i], std::move(params_cur), samples + start_samples, n_samples_cur, log_callback);
     }
 
     {
@@ -5190,7 +5197,7 @@ int whisper_full_parallel(
         params_cur.print_realtime = false;
 
         // Run the first transformation using default state but only for the first chunk.
-        ret = whisper_full_with_state(ctx, ctx->state, std::move(params_cur), samples, offset_samples + n_samples_per_processor);
+        ret = whisper_full_with_state(ctx, ctx->state, std::move(params_cur), samples, offset_samples + n_samples_per_processor, log_callback);
     }
 
     for (int i = 0; i < n_processors - 1; ++i) {
