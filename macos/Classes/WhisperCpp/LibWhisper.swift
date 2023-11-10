@@ -43,7 +43,7 @@ actor WhisperContext {
             whisper_reset_timings(context)
             print("About to run whisper_full")
             samples.withUnsafeBufferPointer { samples in
-                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count)) != 0) {
+                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
                     whisper_print_timings(context)
@@ -75,13 +75,20 @@ actor WhisperContext {
             whisper_reset_timings(context)
             print("About to run whisper_full")
             samples.withUnsafeBufferPointer { samples in
-                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count)) != 0) {
+                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
                     whisper_print_timings(context)
                 }
             }
         }
+    }
+    
+    typealias WhisperTranscriptionLogCallback = @convention(c) (UnsafePointer<CChar>) -> Void
+    
+    let logCallback: whisper_transcription_log_callback = { message in
+        let log = String.init(cString: message!)
+        print("Log from whisper_full: \(log)")
     }
     
     // Function to get transcription

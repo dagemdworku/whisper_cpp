@@ -446,6 +446,8 @@ extern "C" {
     WHISPER_API struct whisper_full_params * whisper_full_default_params_by_ref(enum whisper_sampling_strategy strategy);
     WHISPER_API struct whisper_full_params whisper_full_default_params(enum whisper_sampling_strategy strategy);
 
+    typedef void (*whisper_transcription_log_callback)(const char *);
+
     // Run the entire model: PCM -> log mel spectrogram -> encoder -> decoder -> text
     // Not thread safe for same context
     // Uses the specified decoding strategy to obtain the text.
@@ -453,14 +455,16 @@ extern "C" {
                 struct whisper_context * ctx,
             struct whisper_full_params   params,
                            const float * samples,
-                                   int   n_samples);
+                                   int   n_samples,
+      whisper_transcription_log_callback log_callback);
 
     WHISPER_API int whisper_full_with_state(
                 struct whisper_context * ctx,
                   struct whisper_state * state,
             struct whisper_full_params   params,
                            const float * samples,
-                                   int   n_samples);
+                                   int   n_samples,
+      whisper_transcription_log_callback log_callback);
 
     // Split the input audio in chunks and process each chunk separately using whisper_full_with_state()
     // Result is stored in the default state of the context
@@ -472,7 +476,8 @@ extern "C" {
             struct whisper_full_params   params,
                            const float * samples,
                                    int   n_samples,
-                                   int   n_processors);
+                                   int   n_processors,
+      whisper_transcription_log_callback log_callback);
 
     // Number of generated text segments
     // A segment can be a few words, a sentence, or even a paragraph.
