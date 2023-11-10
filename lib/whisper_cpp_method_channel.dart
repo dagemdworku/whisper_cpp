@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:whisper_cpp/whisper_cpp.dart';
 
 import 'whisper_cpp_platform_interface.dart';
 
@@ -27,8 +28,11 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   }
 
   @override
-  Future<void> initialize() async {
-    return await methodChannel.invokeMethod<void>('initialize');
+  Future<WhisperConfig> initialize() async {
+    final config =
+        await methodChannel.invokeMethod<Map<Object?, Object?>>('initialize');
+
+    return WhisperConfig.fromJson(config);
   }
 
   @override

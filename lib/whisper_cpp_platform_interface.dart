@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:whisper_cpp/whisper_cpp.dart';
 
 import 'whisper_cpp_method_channel.dart';
 
@@ -33,7 +34,7 @@ abstract class WhisperCppPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> initialize() {
+  Future<WhisperConfig> initialize() {
     throw UnimplementedError('initialize() has not been implemented.');
   }
 

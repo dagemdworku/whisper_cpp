@@ -1,4 +1,9 @@
+import 'package:whisper_cpp/whisper_cpp.dart';
+
 import 'whisper_cpp_platform_interface.dart';
+
+export 'src/models/models.dart';
+export 'src/utils/utils.dart';
 
 class WhisperCpp {
   static Stream<bool> get isRecording {
@@ -13,7 +18,7 @@ class WhisperCpp {
     return WhisperCppPlatform.instance.getPlatformVersion();
   }
 
-  Future<void> initialize() {
+  Future<WhisperConfig> initialize() {
     return WhisperCppPlatform.instance.initialize();
   }
 
