@@ -51,7 +51,7 @@ actor WhisperContext {
             }
         }
     }
-
+    
     // Function to initialize stream with samples
     // Uses a maximum of 8 threads, leaving 2 processors free
     func initialiseStream(samples: [Float]) {
@@ -103,14 +103,26 @@ actor WhisperContext {
     
     // Static function to create a new WhisperContext
     // Throws an error if the context could not be initialized
-    static func createContext(path: String) throws -> WhisperContext {
-        let context = whisper_init_from_file(path)
-        if let context {
-            return WhisperContext(context: context)
-        } else {
+    static func createContext(path: String) throws -> WhisperInitResult {
+        guard let resultOpaquePtr = whisper_init_from_file(path) else {
             print("Couldn't load model at \(path)")
             throw WhisperError.couldNotInitializeContext
         }
+        
+        let resultPtr = UnsafeMutableRawPointer(resultOpaquePtr)
+            .assumingMemoryBound(to: whisper_init_result.self)
+        let result = resultPtr.pointee
+        
+        let context: OpaquePointer = result.context
+        let modelConfig = WhisperModelConfig(model_config: result.model_config)
+        let computeConfig = WhisperComputeConfig(compute_config: result.compute_config)
+        
+        return WhisperInitResult(
+            context: context,
+            whisperContext:  WhisperContext(context: context),
+            modelConfig: modelConfig,
+            computeConfig: computeConfig
+        )
     }
 }
 
