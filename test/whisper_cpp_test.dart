@@ -15,6 +15,14 @@ class MockWhisperCppPlatform
 
   @override
   Future<bool> toggleRecord() => Future.value(null);
+
+  @override
+  // TODO: implement isRecording
+  Stream<bool> get isRecording => throw UnimplementedError();
+
+  @override
+  // TODO: implement statusLog
+  Stream<String> get statusLog => throw UnimplementedError();
 }
 
 void main() {
