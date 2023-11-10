@@ -88,6 +88,40 @@ extern "C" {
         float vlen;        // voice length of the token
     } whisper_token_data;
 
+    typedef struct whisper_model_config {
+        int n_vocab;
+        int n_audio_ctx;
+        int n_audio_state;
+        int n_audio_head;
+        int n_audio_layer;
+        int n_text_ctx;
+        int n_text_state;
+        int n_text_head;
+        int n_text_layer;
+        int n_mels;
+        int ftype;
+        int qntvr;
+        int type;
+        int extra_tokens;
+        float model_ctx;
+        float model_size;
+    } whisper_model_config;
+
+    typedef struct whisper_compute_config{
+        float kv_self_size;
+        float kv_cross_size;
+        float compute_buffer_conv;
+        float compute_buffer_encode;
+        float compute_buffer_cross;
+        float compute_buffer_decode;
+    } whisper_compute_config;
+
+    typedef struct whisper_init_result {
+        struct whisper_context * context;
+        whisper_model_config model_config;
+        whisper_compute_config compute_config;
+    } whisper_init_result;
+
     typedef struct whisper_model_loader {
         void * context;
 
@@ -99,17 +133,17 @@ extern "C" {
     // Various functions for loading a ggml whisper model.
     // Allocate (almost) all memory needed for the model.
     // Return NULL on failure
-    WHISPER_API struct whisper_context * whisper_init_from_file(const char * path_model);
-    WHISPER_API struct whisper_context * whisper_init_from_buffer(void * buffer, size_t buffer_size);
-    WHISPER_API struct whisper_context * whisper_init(struct whisper_model_loader * loader);
+    WHISPER_API struct whisper_init_result * whisper_init_from_file(const char * path_model);
+    WHISPER_API struct whisper_init_result * whisper_init_from_buffer(void * buffer, size_t buffer_size);
+    WHISPER_API struct whisper_init_result * whisper_init(struct whisper_model_loader * loader);
 
     // These are the same as the above, but the internal state of the context is not allocated automatically
     // It is the responsibility of the caller to allocate the state using whisper_init_state() (#523)
-    WHISPER_API struct whisper_context * whisper_init_from_file_no_state(const char * path_model);
-    WHISPER_API struct whisper_context * whisper_init_from_buffer_no_state(void * buffer, size_t buffer_size);
-    WHISPER_API struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loader);
+    WHISPER_API struct whisper_context * whisper_init_from_file_no_state(const char * path_model, whisper_model_config * model_config);
+    WHISPER_API struct whisper_context * whisper_init_from_buffer_no_state(void * buffer, size_t buffer_size, whisper_model_config * model_config);
+    WHISPER_API struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loader, whisper_model_config * model_config);
 
-    WHISPER_API struct whisper_state * whisper_init_state(struct whisper_context * ctx);
+    WHISPER_API struct whisper_state * whisper_init_state(struct whisper_context * ctx, whisper_compute_config * compute_config);
 
     // Given a context, enable use of OpenVINO for encode inference.
     // model_path: Optional path to OpenVINO encoder IR model. If set to nullptr,
