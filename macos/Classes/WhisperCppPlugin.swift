@@ -17,6 +17,8 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         case "initialize":
             initialize()
             result(nil)
+        case "toggleRecord":
+            toggleRecord(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -24,5 +26,20 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
     
     @MainActor private func initialize(){
         whisperState = WhisperState()
+    }
+    
+    @MainActor private func toggleRecord(result: @escaping FlutterResult) {
+        if whisperState == nil {
+            result(nil)
+        } else {
+            Task {
+                do {
+                    await self.whisperState!.toggleRecord()
+                    DispatchQueue.main.async {
+                        result(nil)
+                    }
+                }
+            }
+        }
     }
 }
