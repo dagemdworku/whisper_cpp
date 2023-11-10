@@ -78,7 +78,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initialize() async {
-    await _whisperCppPlugin.initialize();
+    WhisperConfig config = await _whisperCppPlugin.initialize();
+    print(config.toJson());
+
     _registerIsRecordingChangeListener();
     _registerStatusLogChangeListener();
   }
