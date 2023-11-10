@@ -17,7 +17,7 @@ struct WhisperModelConfig {
     var extraTokens: Int32
     var modelCtx: Float
     var modelSize: Float
-
+    
     init(model_config: whisper_model_config) {
         self.nVocab = model_config.n_vocab
         self.nAudioCtx = model_config.n_audio_ctx
@@ -35,5 +35,26 @@ struct WhisperModelConfig {
         self.extraTokens = model_config.extra_tokens
         self.modelCtx = model_config.model_ctx
         self.modelSize = model_config.model_size
+    }
+    
+    func toDictionary() -> [String: Any] {
+        return [
+            "nVocab": self.nVocab,
+            "nAudioCtx": self.nAudioCtx,
+            "nAudioState": self.nAudioState,
+            "nAudioHead": self.nAudioHead,
+            "nAudioLayer": self.nAudioLayer,
+            "nTextCtx": self.nTextCtx,
+            "nTextState": self.nTextState,
+            "nTextHead": self.nTextHead,
+            "nTextLayer": self.nTextLayer,
+            "nMels": self.nMels,
+            "ftype": self.ftype,
+            "qntvr": self.qntvr,
+            "type": self.type,
+            "extraTokens": self.extraTokens,
+            "modelCtx": self.modelCtx,
+            "modelSize": self.modelSize
+        ]
     }
 }

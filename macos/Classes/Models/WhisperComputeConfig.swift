@@ -16,4 +16,15 @@ struct WhisperComputeConfig {
         self.computeBufferCross = compute_config.compute_buffer_cross
         self.computeBufferDecode = compute_config.compute_buffer_decode
     }
+    
+    func toDictionary() -> [String: Any] {
+        return [
+            "kvSelfSize": self.kvSelfSize,
+            "kvCrossSize": self.kvCrossSize,
+            "computeBufferConv": self.computeBufferConv,
+            "computeBufferEncode": self.computeBufferEncode,
+            "computeBufferCross": self.computeBufferCross,
+            "computeBufferDecode": self.computeBufferDecode
+        ]
+    }
 }
