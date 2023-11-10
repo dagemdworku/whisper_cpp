@@ -23,6 +23,9 @@ abstract class WhisperCppPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Stream<bool> get isRecording =>
+      throw UnimplementedError('get isRecording is not implemented');
+
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
