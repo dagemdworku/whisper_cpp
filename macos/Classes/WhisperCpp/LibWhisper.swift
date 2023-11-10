@@ -93,14 +93,12 @@ actor WhisperContext {
     
     // Function to get transcription
     // Concatenates all segments of the transcription
-    func getTranscription(updateTranscription: (String) -> Void) -> String {
-        var data = ""
-        transcription = ""
+    func getTranscription() -> String {
+        var transcription = ""
         for i in 0..<whisper_full_n_segments(context) {
-            print("Received value 1: \(String.init(cString: whisper_full_get_segment_text(context, i)))")
-            data += String.init(cString: whisper_full_get_segment_text(context, i))
+            transcription += String.init(cString: whisper_full_get_segment_text(context, i))
         }
-        return data
+        return transcription
     }
     
     // Static function to create a new WhisperContext
