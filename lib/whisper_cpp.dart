@@ -8,4 +8,8 @@ class WhisperCpp {
   Future<void> initialize() {
     return WhisperCppPlatform.instance.initialize();
   }
+
+  Future<void> toggleRecord() {
+    return WhisperCppPlatform.instance.toggleRecord();
+  }
 }

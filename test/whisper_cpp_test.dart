@@ -12,6 +12,9 @@ class MockWhisperCppPlatform
 
   @override
   Future<void> initialize() => Future.value(null);
+
+  @override
+  Future<bool> toggleRecord() => Future.value(null);
 }
 
 void main() {

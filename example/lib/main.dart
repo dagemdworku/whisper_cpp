@@ -58,6 +58,12 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: const Text('Initialize'),
               ),
+              ElevatedButton(
+                onPressed: () async {
+                  await _whisperCppPlugin.toggleRecord();
+                },
+                child: const Text('Toggle Record'),
+              ),
             ],
           ),
         ),
