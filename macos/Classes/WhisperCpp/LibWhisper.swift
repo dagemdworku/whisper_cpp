@@ -43,7 +43,7 @@ actor WhisperContext {
             whisper_reset_timings(context)
             print("About to run whisper_full")
             samples.withUnsafeBufferPointer { samples in
-                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count)) != 0) {
+                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
                     whisper_print_timings(context)
@@ -75,7 +75,7 @@ actor WhisperContext {
             whisper_reset_timings(context)
             print("About to run whisper_full")
             samples.withUnsafeBufferPointer { samples in
-                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count)) != 0) {
+                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
                     whisper_print_timings(context)
@@ -84,14 +84,23 @@ actor WhisperContext {
         }
     }
     
+    typealias WhisperTranscriptionLogCallback = @convention(c) (UnsafePointer<CChar>) -> Void
+    
+    let logCallback: whisper_transcription_log_callback = { message in
+        let log = String.init(cString: message!)
+        print("Log from whisper_full: \(log)")
+    }
+    
     // Function to get transcription
     // Concatenates all segments of the transcription
-    func getTranscription() -> String {
-        var transcription = ""
+    func getTranscription(updateTranscription: (String) -> Void) -> String {
+        var data = ""
+        transcription = ""
         for i in 0..<whisper_full_n_segments(context) {
-            transcription += String.init(cString: whisper_full_get_segment_text(context, i))
+            print("Received value 1: \(String.init(cString: whisper_full_get_segment_text(context, i)))")
+            data += String.init(cString: whisper_full_get_segment_text(context, i))
         }
-        return transcription
+        return data
     }
     
     // Static function to create a new WhisperContext
