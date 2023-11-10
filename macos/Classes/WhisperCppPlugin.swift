@@ -3,6 +3,7 @@ import FlutterMacOS
 
 let kFLTWhisperCppMethodChannelName = "plugins.dagemdworku.io/whisper_cpp"
 let kFLTWhisperCppIsRecordingEvent = "whisper_cpp_is_recording_event"
+let kFLTWhisperCppStatusLogEvent = "whisper_cpp_status_log_event"
 
 public class WhisperCppPlugin: NSObject, FlutterPlugin {
     private var whisperState: WhisperState?
@@ -38,6 +39,7 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
     @MainActor private func initialize(){
         whisperState = WhisperState()
         registerIsRecordingEventChannel(whisperState: whisperState!)
+        registerStatusLogEventChannel(whisperState: whisperState!)
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {
@@ -59,5 +61,11 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppIsRecordingEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(IsRecordingStreamHandler(whisperState: whisperState))
+    }
+
+    private func registerStatusLogEventChannel(whisperState: WhisperState) {
+        let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppStatusLogEvent
+        let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
+        eventChannel.setStreamHandler(StatusLogStreamHandler(whisperState: whisperState))
     }
 }

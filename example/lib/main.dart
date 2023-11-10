@@ -19,9 +19,11 @@ class _MyAppState extends State<MyApp> {
   final _whisperCppPlugin = WhisperCpp();
 
   late StreamSubscription<bool> _isRecordingStreamSubscription;
+  late StreamSubscription<dynamic> _statusLogStreamSubscription;
 
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
+  String _statusLog = '';
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               Text('Running on: $_platformVersion\n'),
               Text('Is Recording: $_isRecording\n'),
+              Text('Status: $_statusLog\n'),
               ElevatedButton(
                 onPressed: _initialize,
                 child: const Text('Initialize'),
@@ -77,6 +80,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initialize() async {
     await _whisperCppPlugin.initialize();
     _registerIsRecordingChangeListener();
+    _registerStatusLogChangeListener();
   }
 
   void _registerIsRecordingChangeListener() {
@@ -87,9 +91,17 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _registerStatusLogChangeListener() {
+    _statusLogStreamSubscription = WhisperCpp.statusLog.listen((String event) {
+      _statusLog = event;
+      setState(() {});
+    });
+  }
+
   @override
   void dispose() {
     _isRecordingStreamSubscription.cancel();
+    _statusLogStreamSubscription.cancel();
     super.dispose();
   }
 }

@@ -5,6 +5,10 @@ class WhisperCpp {
     return WhisperCppPlatform.instance.isRecording;
   }
 
+  static Stream<String> get statusLog {
+    return WhisperCppPlatform.instance.statusLog;
+  }
+
   Future<String?> getPlatformVersion() {
     return WhisperCppPlatform.instance.getPlatformVersion();
   }
