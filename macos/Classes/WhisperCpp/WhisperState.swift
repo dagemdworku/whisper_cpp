@@ -7,9 +7,10 @@ import AVFoundation
 @MainActor
 class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isModelLoaded = false  // Indicates if the model is loaded
-    @Published var messageLog = ""  // Log of messages for debugging and user feedback
     @Published var canTranscribe = false  // Indicates if the app is ready to transcribe audio
     @Published var isRecording = false  // Indicates if the app is currently recording audio
+    @Published var messageLog = ""  // Log of messages for debugging and user feedback
+    @Published var statusLog = ""  // Log of messages for debugging and user feedback
     
     private var whisperContext: WhisperContext?  // The context for the Whisper model
     private let recorder = Recorder()  // The audio recorder
@@ -46,9 +47,11 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // Load the Whisper model
     private func loadModel() throws {
         messageLog += "Loading model...\n"
+        statusLog = "Loading model..."
         if let modelUrl {
             whisperContext = try WhisperContext.createContext(path: modelUrl.path())
             messageLog += "Loaded model \(modelUrl.lastPathComponent)\n"
+            statusLog = "Loaded model \(modelUrl.lastPathComponent)"
         } else {
             messageLog += "Could not locate model\n"
         }
@@ -75,11 +78,14 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         do {
             canTranscribe = false
             messageLog += "Reading wave samples...\n"
+            statusLog = "Reading wave samples..."
             let data = try readAudioSamples(url)
             messageLog += "Transcribing data...\n"
+            statusLog = "Transcribing data..."
             await whisperContext.fullTranscribe(samples: data)
             let text = await whisperContext.getTranscription()
             messageLog += "Done: \(text)\n"
+            statusLog = "Done."
         } catch {
             print(error.localizedDescription)
             messageLog += "\(error.localizedDescription)\n"
@@ -98,7 +104,9 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // Toggle recording state
     func toggleRecord() async {
         if isRecording {
+            self.statusLog = "Stpoing recorder..."
             await recorder.stopRecording()
+            self.statusLog = "Recorder stopped."
             isRecording = false
             if let recordedFile {
                 await transcribeAudio(recordedFile)
@@ -108,10 +116,14 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
                 if granted {
                     Task {
                         do {
+                            self.statusLog = "Stoping playback..."
                             self.stopPlayback()
+                            self.statusLog = "Playback stopped."
                             let file = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                                 .appending(path: "output.wav")
+                            self.statusLog = "Starting recorder..."
                             try await self.recorder.startRecording(toOutputFile: file, delegate: self)
+                            self.statusLog = "Recording..."
                             self.isRecording = true
                             self.recordedFile = file
                         } catch {
