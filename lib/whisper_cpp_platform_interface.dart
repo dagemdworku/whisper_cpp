@@ -26,4 +26,8 @@ abstract class WhisperCppPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<void> initialize() {
+    throw UnimplementedError('initialize() has not been implemented.');
+  }
 }

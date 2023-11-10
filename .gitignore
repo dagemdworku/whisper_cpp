@@ -29,3 +29,5 @@ migrate_working_dir/
 .vscode/
 .packages
 build/
+
+ggml*.bin
