@@ -11,10 +11,12 @@ class MockWhisperCppPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<void> initialize() => Future.value(null);
+  // TODO: implement isRecording
+  Future<WhisperConfig> initialize() => throw UnimplementedError();
 
   @override
-  Future<bool> toggleRecord() => Future.value(null);
+  // TODO: implement isRecording
+  Future<bool> toggleRecord() => throw UnimplementedError();
 
   @override
   // TODO: implement isRecording
