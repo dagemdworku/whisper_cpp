@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -79,19 +81,18 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initialize() async {
     try {
-      WhisperConfig config = await _whisperCppPlugin.initialize();
+      WhisperConfig config = await _whisperCppPlugin.initialize(
+        modelName: 'ggml-tiny.en',
+      );
       print(config.toJson());
 
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
-    } catch (error) {
-      if (error is WhisperCppException) {
-        print('WhisperCppException code: ${error.code}');
-        print('WhisperCppException message: ${error.message}');
-        print('WhisperCppException tips: ${error.tips}');
-      } else {
-        print(error);
-      }
+    } on WhisperCppException catch (e) {
+      print('WhisperCppException code: ${e.code}');
+      print('WhisperCppException message: ${e.message}');
+      print('WhisperCppException tips: ${e.tips}');
+      print(e.toString());
     }
   }
 
