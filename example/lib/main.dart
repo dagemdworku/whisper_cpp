@@ -78,11 +78,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initialize() async {
-    WhisperConfig config = await _whisperCppPlugin.initialize();
-    print(config.toJson());
+    try {
+      WhisperConfig config = await _whisperCppPlugin.initialize();
+      print(config.toJson());
 
-    _registerIsRecordingChangeListener();
-    _registerStatusLogChangeListener();
+      _registerIsRecordingChangeListener();
+      _registerStatusLogChangeListener();
+    } catch (error) {
+      if (error is WhisperCppException) {
+        print('WhisperCppException code: ${error.code}');
+        print('WhisperCppException message: ${error.message}');
+        print('WhisperCppException tips: ${error.tips}');
+      } else {
+        print(error);
+      }
+    }
   }
 
   void _registerIsRecordingChangeListener() {

@@ -35,14 +35,16 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     // Initialize the WhisperState
-    override init() {
+    init(modelName: String) throws {
         super.init()
+        
         do {
             self.whisperConfig = try loadModel()
             canTranscribe = true
         } catch {
             print(error.localizedDescription)
             messageLog += "\(error.localizedDescription)\n"
+            throw error
         }
     }
     
@@ -58,7 +60,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
             return result
         } else {
             messageLog += "Could not locate model\n"
-            return nil
+            throw WhisperCppException(error: .modelNotFound)
         }
     }
     

@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:whisper_cpp/whisper_cpp.dart';
 
 import 'whisper_cpp_platform_interface.dart';
 
+export 'src/enums/all.dart';
 export 'src/models/models.dart';
 export 'src/utils/utils.dart';
 
@@ -19,10 +22,16 @@ class WhisperCpp {
   }
 
   Future<WhisperConfig> initialize() {
-    return WhisperCppPlatform.instance.initialize();
+    if (Platform.isMacOS || Platform.isIOS) {
+      return WhisperCppPlatform.instance.initialize();
+    }
+    throw WhisperCppException.platformNotSupported();
   }
 
   Future<void> toggleRecord() {
-    return WhisperCppPlatform.instance.toggleRecord();
+    if (Platform.isMacOS || Platform.isIOS) {
+      return WhisperCppPlatform.instance.toggleRecord();
+    }
+    throw WhisperCppException.platformNotSupported();
   }
 }

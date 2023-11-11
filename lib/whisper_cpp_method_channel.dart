@@ -29,15 +29,21 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   @override
   Future<WhisperConfig> initialize() async {
-    final config =
-        await methodChannel.invokeMethod<Map<Object?, Object?>>('initialize');
-
-    return WhisperConfig.fromJson(config);
+    try {
+      final config = await methodChannel.invokeMethod('initialize');
+      return WhisperConfig.fromJson(config);
+    } on PlatformException catch (e) {
+      throw WhisperCppException.mapToWhisperCppException(e.code);
+    }
   }
 
   @override
   Future<void> toggleRecord() async {
-    return await methodChannel.invokeMethod<void>('toggleRecord');
+    try {
+      return await methodChannel.invokeMethod<void>('toggleRecord');
+    } on PlatformException catch (e) {
+      throw WhisperCppException.mapToWhisperCppException(e.code);
+    }
   }
 
   @override
