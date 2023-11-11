@@ -28,9 +28,15 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   }
 
   @override
-  Future<WhisperConfig> initialize() async {
+  Future<WhisperConfig> initialize({
+    required String modelName,
+  }) async {
+    Map<String, dynamic> arguments = {
+      'modelName': modelName,
+    };
+
     try {
-      final config = await methodChannel.invokeMethod('initialize');
+      final config = await methodChannel.invokeMethod('initialize', arguments);
       return WhisperConfig.fromJson(config);
     } on PlatformException catch (e) {
       throw WhisperCppException.mapToWhisperCppException(e.code);
