@@ -50,18 +50,16 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
                 
                 result(whisperConfigDict)
             } catch {
-                result(FlutterError(code: error.localizedDescription,
-                                    message: nil,details: nil))
+                result(flutterError(from: error))
             }
         } else {
-            result(FlutterError(code: WhisperCppError.alreadyInitialized.rawValue,
-                                message: nil,details: nil))
+            result(whisperCppError(from: WhisperCppError.alreadyInitialized))
         }
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {
         if whisperState == nil {
-            result(nil)
+            result(whisperCppError(from: WhisperCppError.notInitialized))
         } else {
             Task {
                 do {
@@ -84,5 +82,13 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppStatusLogEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(StatusLogStreamHandler(whisperState: whisperState))
+    }
+    
+    private func flutterError(from error: Error) -> FlutterError {
+        return FlutterError(code: "\(error.localizedDescription)", message: nil, details: nil)
+    }
+    
+    private func whisperCppError(from error: WhisperCppError) -> FlutterError {
+        return FlutterError(code: "\(error.rawValue)", message: nil, details: nil)
     }
 }

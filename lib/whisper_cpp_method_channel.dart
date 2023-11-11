@@ -39,7 +39,11 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   @override
   Future<void> toggleRecord() async {
-    return await methodChannel.invokeMethod<void>('toggleRecord');
+    try {
+      return await methodChannel.invokeMethod<void>('toggleRecord');
+    } on PlatformException catch (e) {
+      throw WhisperCppException.mapToWhisperCppException(e.code);
+    }
   }
 
   @override
