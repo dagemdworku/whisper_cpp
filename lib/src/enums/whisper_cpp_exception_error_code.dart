@@ -3,6 +3,7 @@ enum WhisperCppExceptionErrorCode {
   alreadyInitialized,
   notInitialized,
   platformNotSupported,
+  configurationError,
   unknown
 }
 
@@ -11,6 +12,7 @@ const Map<WhisperCppExceptionErrorCode, String> errorCodeMap = {
   WhisperCppExceptionErrorCode.alreadyInitialized: 'already-initialized',
   WhisperCppExceptionErrorCode.notInitialized: 'not-initialized',
   WhisperCppExceptionErrorCode.platformNotSupported: 'platform-not-supported',
+  WhisperCppExceptionErrorCode.configurationError: 'configuration-error',
   WhisperCppExceptionErrorCode.unknown: 'unknown',
 };
 
