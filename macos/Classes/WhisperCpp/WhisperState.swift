@@ -19,11 +19,6 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     private var recordedFile: URL? = nil  // The URL of the recorded audio file
     private var audioPlayer: AVAudioPlayer?  // The audio player for playback of recorded audio
     
-    // The URL of the model file
-    private var modelUrl: URL? {
-        Bundle.main.url(forResource: "ggml-tiny.en", withExtension: "bin", subdirectory: nil)
-    }
-    
     // The URL of the sample audio file
     private var sampleUrl: URL? {
         Bundle.main.url(forResource: "jfk", withExtension: "wav", subdirectory: nil)
@@ -39,7 +34,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         super.init()
         
         do {
-            self.whisperConfig = try loadModel()
+            self.whisperConfig = try loadModel(modelName: modelName)
             canTranscribe = true
         } catch {
             print(error.localizedDescription)
@@ -49,9 +44,14 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     // Load the Whisper model
-    private func loadModel() throws -> WhisperConfig? {
+    private func loadModel(modelName: String) throws -> WhisperConfig? {
         messageLog += "Loading model...\n"
         statusLog = "Loading model..."
+        
+        var modelUrl: URL? {
+            Bundle.main.url(forResource: modelName, withExtension: "bin", subdirectory: nil)
+        }
+        
         if let modelUrl {
             let result: WhisperConfig = try WhisperContext.createContext(path: modelUrl.path())
             whisperContext = result.whisperContext
