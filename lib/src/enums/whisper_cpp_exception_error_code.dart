@@ -1,11 +1,13 @@
 enum WhisperCppExceptionErrorCode {
   modelNotFound,
+  alreadyInitialized,
   platformNotSupported,
   unknown
 }
 
 const Map<WhisperCppExceptionErrorCode, String> errorCodeMap = {
   WhisperCppExceptionErrorCode.modelNotFound: 'model-not-found',
+  WhisperCppExceptionErrorCode.alreadyInitialized: 'already-initialized',
   WhisperCppExceptionErrorCode.platformNotSupported: 'platform-not-supported',
   WhisperCppExceptionErrorCode.unknown: 'unknown',
 };

@@ -1,5 +1,6 @@
 enum WhisperCppError: String {
     case modelNotFound = "model-not-found"
+    case alreadyInitialized = "already-initialized"
     // TODO: Add the rest of the error enum later
 }
 

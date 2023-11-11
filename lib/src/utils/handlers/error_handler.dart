@@ -36,6 +36,10 @@ class WhisperCppException implements Exception {
         tips =
             'Please check if the model file exists and is in the correct location';
         break;
+      case WhisperCppExceptionErrorCode.alreadyInitialized:
+        message = 'Already initialized';
+        tips = 'Please check if you have already initialized the plugin';
+        break;
       case WhisperCppExceptionErrorCode.platformNotSupported:
         message = 'Platform not supported';
         tips =

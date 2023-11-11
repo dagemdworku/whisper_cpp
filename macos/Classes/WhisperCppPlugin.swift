@@ -53,7 +53,10 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: error.localizedDescription,
                                     message: nil,details: nil))
             }
-        } 
+        } else {
+            result(FlutterError(code: WhisperCppError.alreadyInitialized.rawValue,
+                                message: nil,details: nil))
+        }
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {
