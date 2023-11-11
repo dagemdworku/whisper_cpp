@@ -27,8 +27,7 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         case "getPlatformVersion":
             result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
         case "initialize":
-            initialize()
-            result(nil)
+            initialize(result: result)
         case "toggleRecord":
             toggleRecord(result: result)
         default:
@@ -36,10 +35,18 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    @MainActor private func initialize(){
+    @MainActor private func initialize(result: @escaping FlutterResult){
         whisperState = WhisperState()
+        
         registerIsRecordingEventChannel(whisperState: whisperState!)
         registerStatusLogEventChannel(whisperState: whisperState!)
+        
+        let whisperConfigDict: [String: Any] = [
+            "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
+            "computeConfig": whisperState!.whisperConfig!.computeConfig.toDictionary()
+        ]
+        
+        result(whisperConfigDict)
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {
@@ -62,7 +69,7 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(IsRecordingStreamHandler(whisperState: whisperState))
     }
-
+    
     private func registerStatusLogEventChannel(whisperState: WhisperState) {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppStatusLogEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)

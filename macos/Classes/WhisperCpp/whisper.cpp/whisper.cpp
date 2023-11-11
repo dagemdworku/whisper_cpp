@@ -882,7 +882,7 @@ static void kv_cache_free(struct whisper_kv_cache & cache) {
 //
 // see the convert-pt-to-ggml.py script for details
 //
-static bool whisper_model_load(struct whisper_model_loader * loader, whisper_context & wctx) {
+static bool whisper_model_load(struct whisper_model_loader * loader, whisper_context & wctx, whisper_model_config* model_config) {
     log("%s: loading model\n", __func__);
 
     const int64_t t_start_us = ggml_time_us();
@@ -953,7 +953,21 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         }
 
         const size_t scale = model.hparams.ftype ? 1 : 2;
-
+        
+        model_config->n_vocab = hparams.n_vocab;
+        model_config->n_audio_ctx =  hparams.n_audio_ctx;
+        model_config->n_audio_state =  hparams.n_audio_state;
+        model_config->n_audio_head =  hparams.n_audio_head;
+        model_config->n_audio_layer =  hparams.n_audio_layer;
+        model_config->n_text_ctx =  hparams.n_text_ctx;
+        model_config->n_text_state =  hparams.n_text_state;
+        model_config->n_text_head =  hparams.n_text_head;
+        model_config->n_text_layer =  hparams.n_text_layer;
+        model_config->n_mels =  hparams.n_mels;
+        model_config->ftype =  model.hparams.ftype;
+        model_config->qntvr =  qntvr;
+        model_config->type =  model.type;
+        
         log("%s: n_vocab       = %d\n", __func__, hparams.n_vocab);
         log("%s: n_audio_ctx   = %d\n", __func__, hparams.n_audio_ctx);
         log("%s: n_audio_state = %d\n", __func__, hparams.n_audio_state);
@@ -1047,6 +1061,7 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         }
 
         if (n_vocab < model.hparams.n_vocab) {
+            model_config->extra_tokens = model.hparams.n_vocab - n_vocab;
             log("%s: adding %d extra tokens\n", __func__, model.hparams.n_vocab - n_vocab);
             for (int i = n_vocab; i < model.hparams.n_vocab; i++) {
                 if (i > vocab.token_beg) {
@@ -1185,7 +1200,8 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         }
 
         ctx_size += (15 + 15*n_audio_layer + 24*n_text_layer)*512; // object overhead
-
+        
+        model_config->model_ctx = ctx_size;
         log("%s: model ctx     = %7.2f MB\n", __func__, ctx_size/(1024.0*1024.0));
     }
 
@@ -1465,7 +1481,8 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
             total_size += ggml_nbytes(tensor);
             model.n_loaded++;
         }
-
+        
+        model_config->model_size = total_size;
         log("%s: model size    = %7.2f MB\n", __func__, total_size/1024.0/1024.0);
 
         if (model.n_loaded == 0) {
@@ -2827,7 +2844,7 @@ static std::string whisper_openvino_get_path_cache(std::string path_bin) {
 }
 #endif
 
-struct whisper_state * whisper_init_state(whisper_context * ctx) {
+struct whisper_state * whisper_init_state(whisper_context * ctx, whisper_compute_config* compute_config) {
     fill_sin_cos_table();
     whisper_state * state = new whisper_state;
 
@@ -2839,6 +2856,8 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
 
     {
         const size_t memory_size = ggml_nbytes(state->decoders[0].kv_self.k) + ggml_nbytes(state->decoders[0].kv_self.v);
+        
+        compute_config->kv_self_size = memory_size;
         log("%s: kv self size  = %7.2f MB\n", __func__, memory_size / 1024.0 / 1024.0);
     }
 
@@ -2850,6 +2869,8 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
 
     {
         const size_t memory_size = ggml_nbytes(state->kv_cross.k) + ggml_nbytes(state->kv_cross.v);
+        
+        compute_config->kv_cross_size = memory_size;
         log("%s: kv cross size = %7.2f MB\n", __func__, memory_size / 1024.0 / 1024.0);
     }
 
@@ -2888,7 +2909,8 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
                 [&]() {
                     return whisper_build_graph_conv(*ctx, *state, 0);
                 });
-
+        
+        compute_config->compute_buffer_conv = whisper_allocr_size(state->alloc_conv);
         log("%s: compute buffer (conv)   = %7.2f MB\n", __func__, whisper_allocr_size(state->alloc_conv) / 1024.0 / 1024.0);
     }
 
@@ -2899,6 +2921,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
                     return whisper_build_graph_encoder(*ctx, *state);
                 });
 
+        compute_config->compute_buffer_encode = whisper_allocr_size(state->alloc_encode);
         log("%s: compute buffer (encode) = %7.2f MB\n", __func__, whisper_allocr_size(state->alloc_encode) / 1024.0 / 1024.0);
     }
 
@@ -2909,6 +2932,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
                     return whisper_build_graph_cross(*ctx, *state);
                 });
 
+        compute_config->compute_buffer_cross = whisper_allocr_size(state->alloc_cross);
         log("%s: compute buffer (cross)  = %7.2f MB\n", __func__, whisper_allocr_size(state->alloc_cross) / 1024.0 / 1024.0);
     }
 
@@ -2925,6 +2949,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
                     return whisper_build_graph_decoder(*ctx, *state, state->decoders[0], nullptr, n_tokens, n_past);
                 });
 
+        compute_config->compute_buffer_decode = whisper_allocr_size(state->alloc_decode);
         log("%s: compute buffer (decode) = %7.2f MB\n", __func__, whisper_allocr_size(state->alloc_decode) / 1024.0 / 1024.0);
     }
 
@@ -3038,7 +3063,7 @@ int whisper_ctx_init_openvino_encoder(
 #endif
 }
 
-struct whisper_context * whisper_init_from_file_no_state(const char * path_model) {
+struct whisper_context * whisper_init_from_file_no_state(const char * path_model, whisper_model_config* model_config) {
     log("%s: loading model from '%s'\n", __func__, path_model);
 
     auto fin = std::ifstream(path_model, std::ios::binary);
@@ -3067,7 +3092,7 @@ struct whisper_context * whisper_init_from_file_no_state(const char * path_model
         fin->close();
     };
 
-    auto ctx = whisper_init_no_state(&loader);
+    auto ctx = whisper_init_no_state(&loader, model_config);
 
     if (ctx) {
         ctx->path_model = path_model;
@@ -3076,7 +3101,7 @@ struct whisper_context * whisper_init_from_file_no_state(const char * path_model
     return ctx;
 }
 
-struct whisper_context * whisper_init_from_buffer_no_state(void * buffer, size_t buffer_size) {
+struct whisper_context * whisper_init_from_buffer_no_state(void * buffer, size_t buffer_size, whisper_model_config* model_config) {
     struct buf_context {
         uint8_t* buffer;
         size_t size;
@@ -3110,15 +3135,15 @@ struct whisper_context * whisper_init_from_buffer_no_state(void * buffer, size_t
 
     loader.close = [](void * /*ctx*/) { };
 
-    return whisper_init_no_state(&loader);
+    return whisper_init_no_state(&loader, model_config);
 }
 
-struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loader) {
+struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loader, whisper_model_config* model_config) {
     ggml_time_init();
 
     whisper_context * ctx = new whisper_context;
 
-    if (!whisper_model_load(loader, *ctx)) {
+    if (!whisper_model_load(loader, *ctx, model_config)) {
         loader->close(loader->context);
         log("%s: failed to load model\n", __func__);
         delete ctx;
@@ -3130,49 +3155,41 @@ struct whisper_context * whisper_init_no_state(struct whisper_model_loader * loa
     return ctx;
 }
 
-struct whisper_context * whisper_init_from_file(const char * path_model) {
-    whisper_context * ctx = whisper_init_from_file_no_state(path_model);
+struct whisper_config * _whisper_init(whisper_context * ctx, whisper_config* result) {
     if (!ctx) {
-        return nullptr;
+        whisper_config* result = new whisper_config;
+        result->context = nullptr;
+        return result;
     }
-
-    ctx->state = whisper_init_state(ctx);
+        
+    ctx->state = whisper_init_state(ctx, &result->compute_config);
+    
     if (!ctx->state) {
         whisper_free(ctx);
-        return nullptr;
+        result->context = nullptr;
+        return result;
     }
-
-    return ctx;
+    
+    result->context = ctx;
+    return result;
 }
 
-struct whisper_context * whisper_init_from_buffer(void * buffer, size_t buffer_size) {
-    whisper_context * ctx = whisper_init_from_buffer_no_state(buffer, buffer_size);
-    if (!ctx) {
-        return nullptr;
-    }
-
-    ctx->state = whisper_init_state(ctx);
-    if (!ctx->state) {
-        whisper_free(ctx);
-        return nullptr;
-    }
-
-    return ctx;
+struct whisper_config * whisper_init_from_file(const char * path_model) {
+    whisper_config* result = new whisper_config;
+    whisper_context * ctx = whisper_init_from_file_no_state(path_model, &result->model_config);
+    return _whisper_init(ctx, result);
 }
 
-struct whisper_context * whisper_init(struct whisper_model_loader * loader) {
-    whisper_context * ctx = whisper_init_no_state(loader);
-    if (!ctx) {
-        return nullptr;
-    }
+struct whisper_config * whisper_init_from_buffer(void * buffer, size_t buffer_size) {
+    whisper_config* result = new whisper_config;
+    whisper_context * ctx = whisper_init_from_buffer_no_state(buffer, buffer_size, &result->model_config);
+    return _whisper_init(ctx, result);
+}
 
-    ctx->state = whisper_init_state(ctx);
-    if (!ctx->state) {
-        whisper_free(ctx);
-        return nullptr;
-    }
-
-    return ctx;
+struct whisper_config * whisper_init(struct whisper_model_loader * loader) {
+    whisper_config* result = new whisper_config;
+    whisper_context * ctx = whisper_init_no_state(loader, &result->model_config);
+    return _whisper_init(ctx, result);
 }
 
 void whisper_free_state(struct whisper_state * state)
@@ -5170,7 +5187,8 @@ int whisper_full_parallel(
     std::vector<std::thread> workers(n_processors - 1);
     for (int i = 0; i < n_processors - 1; ++i) {
         // create a new state for each thread
-        states.push_back(whisper_init_state(ctx));
+        // TODO: fix the [nullptr] before using the whisper_full_parallel function
+        states.push_back(whisper_init_state(ctx, nullptr));
 
         const int start_samples = offset_samples + (i + 1)*n_samples_per_processor;
         const int n_samples_cur = (i == n_processors - 2) ? n_samples - start_samples : n_samples_per_processor;
