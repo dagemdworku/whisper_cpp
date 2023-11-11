@@ -44,6 +44,10 @@ class WhisperCppException implements Exception {
         message = 'Not initialized';
         tips = 'Please ensure you have initialized the plugin before using it';
         break;
+      case WhisperCppExceptionErrorCode.configurationError:
+        message = 'Configuration error';
+        tips = 'Please check your configuration';
+        break;
       case WhisperCppExceptionErrorCode.platformNotSupported:
         message = 'Platform not supported';
         tips =
