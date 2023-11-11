@@ -36,17 +36,24 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
     }
     
     @MainActor private func initialize(result: @escaping FlutterResult){
-        whisperState = WhisperState()
-        
-        registerIsRecordingEventChannel(whisperState: whisperState!)
-        registerStatusLogEventChannel(whisperState: whisperState!)
-        
-        let whisperConfigDict: [String: Any] = [
-            "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
-            "computeConfig": whisperState!.whisperConfig!.computeConfig.toDictionary()
-        ]
-        
-        result(whisperConfigDict)
+        if whisperState == nil {
+            do {
+                whisperState = try WhisperState(modelName: "")
+                
+                registerIsRecordingEventChannel(whisperState: whisperState!)
+                registerStatusLogEventChannel(whisperState: whisperState!)
+                
+                let whisperConfigDict: [String: Any] = [
+                    "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
+                    "computeConfig": whisperState!.whisperConfig!.computeConfig.toDictionary()
+                ]
+                
+                result(whisperConfigDict)
+            } catch {
+                result(FlutterError(code: error.localizedDescription,
+                                    message: nil,details: nil))
+            }
+        } 
     }
     
     @MainActor private func toggleRecord(result: @escaping FlutterResult) {
