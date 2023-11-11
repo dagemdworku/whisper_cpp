@@ -27,7 +27,7 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         case "getPlatformVersion":
             result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
         case "initialize":
-            initialize(result: result)
+            initialize(call: call, result: result)
         case "toggleRecord":
             toggleRecord(result: result)
         default:
@@ -35,10 +35,19 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    @MainActor private func initialize(result: @escaping FlutterResult){
+    @MainActor private func initialize(call: FlutterMethodCall, result: @escaping FlutterResult){
+        guard let arguments = call.arguments as? [String: Any] else {
+            result(whisperCppError(from: WhisperCppError.configurationError))
+            return
+        }
+        guard let modelName = arguments["modelName"] as? String else {
+            result(whisperCppError(from: WhisperCppError.configurationError))
+            return
+        }
+
         if whisperState == nil {
             do {
-                whisperState = try WhisperState(modelName: "")
+                whisperState = try WhisperState(modelName: modelName)
                 
                 registerIsRecordingEventChannel(whisperState: whisperState!)
                 registerStatusLogEventChannel(whisperState: whisperState!)
@@ -85,10 +94,10 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
     }
     
     private func flutterError(from error: Error) -> FlutterError {
-        return FlutterError(code: "\(error.localizedDescription)", message: nil, details: nil)
+        return FlutterError(code: error.localizedDescription, message: nil, details: nil)
     }
     
     private func whisperCppError(from error: WhisperCppError) -> FlutterError {
-        return FlutterError(code: "\(error.rawValue)", message: nil, details: nil)
+        return FlutterError(code: error.rawValue, message: nil, details: nil)
     }
 }
