@@ -13,6 +13,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var statusLog = ""  // Log of messages for debugging and user feedback
 
     @Published var result: WhisperResult?
+    @Published var summary: WhisperSummary?
     
     
     var whisperConfig: WhisperConfig?
@@ -93,7 +94,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
             messageLog += "Transcribing data...\n"
             statusLog = "Transcribing data..."
             
-            await whisperContext.fullTranscribe(samples: data, state: self)
+            summary = await whisperContext.fullTranscribe(samples: data, state: self)
             let text = await whisperContext.getTranscription()
             messageLog += "Done: \(text)\n"
             statusLog = "Done."

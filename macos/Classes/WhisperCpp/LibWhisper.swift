@@ -26,11 +26,14 @@ actor WhisperContext {
     
     // Function to transcribe samples
     // Uses a maximum of 8 threads, leaving 2 processors free
-    func fullTranscribe(samples: [Float], state: WhisperState) {
+    func fullTranscribe(samples: [Float], state: WhisperState) -> WhisperSummary? {
         // Leave 2 processors free (i.e. the high-efficiency cores).
         let maxThreads = max(1, min(8, cpuCount() - 2))
         print("Selecting \(maxThreads) threads")
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
+        
+        var summary: WhisperSummary?
+        
         "en".withCString { en in
             // Adapted from whisper.objc
             params.print_realtime = true
@@ -54,10 +57,12 @@ actor WhisperContext {
                 if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
-                    whisper_print_timings(context)
+                    summary = WhisperSummary.init(summary: whisper_print_timings(context))
                 }
             }
         }
+        
+        return summary
     }
     
     let logCallback: whisper_transcription_log_callback = { log in
