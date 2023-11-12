@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
       WhisperConfig config = await _whisperCppPlugin.initialize(
         modelName: 'ggml-tiny.en',
       );
-      print(config.toJson());
+      print('config: ${config.toLog()}');
 
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
