@@ -3637,8 +3637,21 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
     return ctx->vocab.token_transcribe;
 }
 
-void whisper_print_timings(struct whisper_context * ctx) {
+whisper_summary whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
+
+    whisper_summary summary;
+
+    summary.t_sample_us = ctx->state->t_sample_us;
+    summary.n_sample = std::max(1, ctx->state->n_sample);
+    summary.t_encode_us = ctx->state->t_encode_us;
+    summary.n_encode = std::max(1, ctx->state->n_encode);
+    summary.t_decode_us = ctx->state->t_decode_us;
+    summary.n_decode = std::max(1, ctx->state->n_decode);
+    summary.t_prompt_us = ctx->state->t_prompt_us;
+    summary.n_prompt = std::max(1, ctx->state->n_prompt);
+    summary.t_start_us = ctx->t_start_us;
+    summary.t_end_us = t_end_us;
 
     log("\n");
     log("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
@@ -3657,6 +3670,8 @@ void whisper_print_timings(struct whisper_context * ctx) {
         log("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
     }
     log("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
+
+    return summary;
 }
 
 void whisper_reset_timings(struct whisper_context * ctx) {
