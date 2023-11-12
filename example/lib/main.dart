@@ -21,8 +21,9 @@ class _MyAppState extends State<MyApp> {
   final _whisperCppPlugin = WhisperCpp();
 
   late StreamSubscription<bool> _isRecordingStreamSubscription;
-  late StreamSubscription<WhisperResult?> _resultStreamSubscription;
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
+  late StreamSubscription<WhisperResult?> _resultStreamSubscription;
+  late StreamSubscription<WhisperSummary?> _summaryStreamSubscription;
 
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
@@ -93,6 +94,7 @@ class _MyAppState extends State<MyApp> {
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
       _registerResultChangeListener();
+      _registerSummaryChangeListener();
     } on WhisperCppException catch (e) {
       print('WhisperCppException code: ${e.code}');
       print('WhisperCppException message: ${e.message}');
@@ -120,9 +122,19 @@ class _MyAppState extends State<MyApp> {
     _resultStreamSubscription = WhisperCpp.result.listen((
       WhisperResult? event,
     ) {
-      print(event?.toJson() ?? '');
+      // print(event?.toJson() ?? '');
       _result += event?.text ?? '';
       setState(() {});
+    });
+  }
+
+  void _registerSummaryChangeListener() {
+    _summaryStreamSubscription = WhisperCpp.summary.listen((
+      WhisperSummary? event,
+    ) {
+      print(event?.toJson() ?? '');
+      print('load time: ${event?.loadTime}');
+      
     });
   }
 
@@ -131,6 +143,7 @@ class _MyAppState extends State<MyApp> {
     _isRecordingStreamSubscription.cancel();
     _statusLogStreamSubscription.cancel();
     _resultStreamSubscription.cancel();
+    _summaryStreamSubscription.cancel();
     super.dispose();
   }
 }

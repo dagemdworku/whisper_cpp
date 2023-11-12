@@ -30,6 +30,10 @@ class MockWhisperCppPlatform
   @override
   // TODO: implement result
   Stream<WhisperResult?> get result => throw UnimplementedError();
+  
+  @override
+  // TODO: implement summary
+  Stream<WhisperSummary?> get summary => throw UnimplementedError();
 }
 
 void main() {
