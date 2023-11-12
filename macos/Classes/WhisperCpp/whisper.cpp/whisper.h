@@ -128,6 +128,23 @@ extern "C" {
         whisper_token_data token_data;
     } whisper_result;
 
+    typedef struct whisper_summary {
+        int64_t t_sample_us;
+        int32_t n_sample;
+        int64_t t_encode_us;
+        int32_t n_encode;
+        int64_t t_decode_us;
+        int32_t n_decode;
+        int64_t t_prompt_us;
+        int32_t n_prompt;
+        int64_t t_start_us;
+        int64_t t_end_us;
+        int32_t n_fail_p;
+        int32_t n_fail_h;
+        int64_t t_load_us;
+        int64_t t_mel_us;
+    } whisper_summary;
+
     typedef struct whisper_model_loader {
         void * context;
 
@@ -347,7 +364,7 @@ extern "C" {
     WHISPER_API whisper_token whisper_token_transcribe(struct whisper_context * ctx);
 
     // Performance information from the default state.
-    WHISPER_API void whisper_print_timings(struct whisper_context * ctx);
+    WHISPER_API whisper_summary whisper_print_timings(struct whisper_context * ctx);
     WHISPER_API void whisper_reset_timings(struct whisper_context * ctx);
 
     // Print system information
