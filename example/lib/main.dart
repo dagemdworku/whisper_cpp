@@ -23,6 +23,7 @@ class _MyAppState extends State<MyApp> {
   late StreamSubscription<bool> _isRecordingStreamSubscription;
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
   late StreamSubscription<WhisperResult?> _resultStreamSubscription;
+  late StreamSubscription<List<WhisperResult>> _resultsStreamSubscription;
   late StreamSubscription<WhisperSummary?> _summaryStreamSubscription;
 
   String _platformVersion = 'Unknown';
@@ -88,13 +89,14 @@ class _MyAppState extends State<MyApp> {
     try {
       WhisperConfig config = await _whisperCppPlugin.initialize(
         modelName: 'ggml-tiny.en',
-        isDebug: false,
+        isDebug: true,
       );
       print('config: ${config.toLog()}');
 
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
-      _registerResultChangeListener();
+      // _registerResultChangeListener();
+      _registerResultsChangeListener();
       _registerSummaryChangeListener();
     } on WhisperCppException catch (e) {
       print('WhisperCppException code: ${e.code}');
@@ -119,17 +121,29 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _registerResultChangeListener() {
-    _resultStreamSubscription = WhisperCpp.result.listen((
-      WhisperResult? event,
+  // void _registerResultChangeListener() {
+  //   _resultStreamSubscription = WhisperCpp.result.listen((
+  //     WhisperResult? event,
+  //   ) {
+  //     if (event == null) return;
+
+  //     _result += event.text;
+  //     if (event.tokenData.id > event.tokenBeg) _result += '\n';
+
+  //     print('result: ${event.toLog()}');
+
+  //     setState(() {});
+  //   });
+  // }
+
+  void _registerResultsChangeListener() {
+    _resultsStreamSubscription = WhisperCpp.results.listen((
+      List<WhisperResult> event,
     ) {
-      if (event == null) return;
+      _result += event.map((e) => e.text).join();
 
-      _result += event.text;
-      if (event.tokenData.id > event.tokenBeg) _result += '\n';
-
-      print('result: ${event.toLog()}');
-
+      print('results: ${WhisperResult.toLineLog(event)}');
+      
       setState(() {});
     });
   }
@@ -148,6 +162,7 @@ class _MyAppState extends State<MyApp> {
     _isRecordingStreamSubscription.cancel();
     _statusLogStreamSubscription.cancel();
     _resultStreamSubscription.cancel();
+    _resultsStreamSubscription.cancel();
     _summaryStreamSubscription.cancel();
     super.dispose();
   }
