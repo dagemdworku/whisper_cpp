@@ -12,7 +12,8 @@ class MockWhisperCppPlatform
 
   @override
   // TODO: implement isRecording
-  Future<WhisperConfig> initialize() => throw UnimplementedError();
+  Future<WhisperConfig> initialize({required String modelName}) =>
+      throw UnimplementedError();
 
   @override
   // TODO: implement isRecording
@@ -25,6 +26,10 @@ class MockWhisperCppPlatform
   @override
   // TODO: implement statusLog
   Stream<String> get statusLog => throw UnimplementedError();
+
+  @override
+  // TODO: implement result
+  Stream<WhisperResult?> get result => throw UnimplementedError();
 }
 
 void main() {
