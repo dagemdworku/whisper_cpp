@@ -10,6 +10,8 @@ enum WhisperError: Error {
 actor WhisperContext {
     private var context: OpaquePointer
     
+    static var state: WhisperState?
+    
     // Initialize with context
     init(context: OpaquePointer) {
         self.context = context
@@ -20,9 +22,11 @@ actor WhisperContext {
         whisper_free(context)
     }
     
+    @Published var result: WhisperResult?
+    
     // Function to transcribe samples
     // Uses a maximum of 8 threads, leaving 2 processors free
-    func fullTranscribe(samples: [Float]) {
+    func fullTranscribe(samples: [Float], state: WhisperState) {
         // Leave 2 processors free (i.e. the high-efficiency cores).
         let maxThreads = max(1, min(8, cpuCount() - 2))
         print("Selecting \(maxThreads) threads")
@@ -32,17 +36,21 @@ actor WhisperContext {
             params.print_realtime = true
             params.print_progress = false
             params.print_timestamps = true
-            params.print_special = false
+            params.print_special = true
             params.translate = false
             params.language = en
             params.n_threads = Int32(maxThreads)
             params.offset_ms = 0
             params.no_context = true
             params.single_segment = false
+            params.suppress_non_speech_tokens = false
+            params.tdrz_enable = true
             
             whisper_reset_timings(context)
             print("About to run whisper_full")
             samples.withUnsafeBufferPointer { samples in
+                WhisperContext.state = state;
+                
                 if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
                     print("Failed to run the model")
                 } else {
@@ -52,44 +60,13 @@ actor WhisperContext {
         }
     }
     
-    // Function to initialize stream with samples
-    // Uses a maximum of 8 threads, leaving 2 processors free
-    func initialiseStream(samples: [Float]) {
-        // Leave 2 processors free (i.e. the high-efficiency cores).
-        let maxThreads = max(1, min(8, cpuCount() - 2))
-        print("Selecting \(maxThreads) threads")
-        var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
-        "en".withCString { en in
-            // Adapted from whisper.objc
-            params.print_realtime = true
-            params.print_progress = false
-            params.print_timestamps = true
-            params.print_special = false
-            params.translate = false
-            params.language = en
-            params.n_threads = Int32(maxThreads)
-            params.offset_ms = 0
-            params.no_context = true
-            params.single_segment = false
-            
-            whisper_reset_timings(context)
-            print("About to run whisper_full")
-            samples.withUnsafeBufferPointer { samples in
-                if (whisper_full(context, params, samples.baseAddress, Int32(samples.count), logCallback) != 0) {
-                    print("Failed to run the model")
-                } else {
-                    whisper_print_timings(context)
-                }
-            }
+    let logCallback: whisper_transcription_log_callback = { log in
+        Task {
+            await state?.updateResult(with: log!.pointee)
         }
     }
     
     typealias WhisperTranscriptionLogCallback = @convention(c) (UnsafePointer<CChar>) -> Void
-    
-    let logCallback: whisper_transcription_log_callback = { message in
-        let log = String.init(cString: message!)
-        print("Log from whisper_full: \(log)")
-    }
     
     // Function to get transcription
     // Concatenates all segments of the transcription

@@ -11,6 +11,9 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false  // Indicates if the app is currently recording audio
     @Published var messageLog = ""  // Log of messages for debugging and user feedback
     @Published var statusLog = ""  // Log of messages for debugging and user feedback
+
+    @Published var result: WhisperResult?
+    
     
     var whisperConfig: WhisperConfig?
     
@@ -89,7 +92,8 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
             let data = try readAudioSamples(url)
             messageLog += "Transcribing data...\n"
             statusLog = "Transcribing data..."
-            await whisperContext.fullTranscribe(samples: data)
+            
+            await whisperContext.fullTranscribe(samples: data, state: self)
             let text = await whisperContext.getTranscription()
             messageLog += "Done: \(text)\n"
             statusLog = "Done."
@@ -100,11 +104,15 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         canTranscribe = true
     }
+
+    func updateResult(with newValue: whisper_result) {
+        self.result = WhisperResult(result: newValue)
+    }
     
     // Read audio samples from a file
     private func readAudioSamples(_ url: URL) throws -> [Float] {
         stopPlayback()
-        try startPlayback(url)
+        // try startPlayback(url)
         return try RiffWaveUtils.decodeWaveFile(url)
     }
     
