@@ -3175,21 +3175,21 @@ struct whisper_config * _whisper_init(whisper_context * ctx, whisper_config* res
 }
 
 struct whisper_config * whisper_init_from_file(const char * path_model) {
-    whisper_config* result = new whisper_config;
-    whisper_context * ctx = whisper_init_from_file_no_state(path_model, &result->model_config);
-    return _whisper_init(ctx, result);
+    whisper_config* config = new whisper_config;
+    whisper_context * ctx = whisper_init_from_file_no_state(path_model, &config->model_config);
+    return _whisper_init(ctx, config);
 }
 
 struct whisper_config * whisper_init_from_buffer(void * buffer, size_t buffer_size) {
-    whisper_config* result = new whisper_config;
-    whisper_context * ctx = whisper_init_from_buffer_no_state(buffer, buffer_size, &result->model_config);
-    return _whisper_init(ctx, result);
+    whisper_config* config = new whisper_config;
+    whisper_context * ctx = whisper_init_from_buffer_no_state(buffer, buffer_size, &config->model_config);
+    return _whisper_init(ctx, config);
 }
 
 struct whisper_config * whisper_init(struct whisper_model_loader * loader) {
-    whisper_config* result = new whisper_config;
-    whisper_context * ctx = whisper_init_no_state(loader, &result->model_config);
-    return _whisper_init(ctx, result);
+    whisper_config* config = new whisper_config;
+    whisper_context * ctx = whisper_init_no_state(loader, &config->model_config);
+    return _whisper_init(ctx, config);
 }
 
 void whisper_free_state(struct whisper_state * state)
@@ -5058,6 +5058,13 @@ int whisper_full_with_state(
                     if (params.tdrz_enable && tokens_cur[i].id == whisper_token_solm(ctx)) {
                         speaker_turn_next = true;
                     }
+                    
+                    whisper_result* result = new whisper_result;
+                    result->time = seek + 2*(tokens_cur[i].tid - whisper_token_beg(ctx));
+                    result->text = ctx->vocab.id_to_token[tokens_cur[i].id].c_str();
+                    result->token_data = tokens_cur[i];
+                    
+                    log_callback(result);
 
                     if (tokens_cur[i].id > whisper_token_beg(ctx) && !params.single_segment) {
                         const auto t1 = seek + 2*(tokens_cur[i].tid - whisper_token_beg(ctx));
@@ -5069,7 +5076,6 @@ int whisper_full_with_state(
                             if (params.print_realtime) {
                                 if (params.print_timestamps) {
                                     printf("[%s --> %s]  %s\n", to_timestamp(tt0).c_str(), to_timestamp(tt1).c_str(), text.c_str());
-                                    log_callback(text.c_str());
                                 } else {
                                     printf("%s", text.c_str());
                                     fflush(stdout);

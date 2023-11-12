@@ -122,6 +122,12 @@ extern "C" {
         whisper_compute_config compute_config;
     } whisper_config;
 
+    typedef struct whisper_result {
+        int64_t time;
+        const char * text;
+        whisper_token_data token_data;
+    } whisper_result;
+
     typedef struct whisper_model_loader {
         void * context;
 
@@ -480,7 +486,7 @@ extern "C" {
     WHISPER_API struct whisper_full_params * whisper_full_default_params_by_ref(enum whisper_sampling_strategy strategy);
     WHISPER_API struct whisper_full_params whisper_full_default_params(enum whisper_sampling_strategy strategy);
 
-    typedef void (*whisper_transcription_log_callback)(const char *);
+    typedef void (*whisper_transcription_log_callback)(whisper_result *);
 
     // Run the entire model: PCM -> log mel spectrogram -> encoder -> decoder -> text
     // Not thread safe for same context

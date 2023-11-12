@@ -17,6 +17,10 @@ class WhisperCpp {
     return WhisperCppPlatform.instance.statusLog;
   }
 
+  static Stream<WhisperResult?> get result {
+    return WhisperCppPlatform.instance.result;
+  }
+
   Future<String?> getPlatformVersion() {
     return WhisperCppPlatform.instance.getPlatformVersion();
   }
