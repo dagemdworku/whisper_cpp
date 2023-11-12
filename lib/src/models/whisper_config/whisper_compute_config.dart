@@ -1,5 +1,7 @@
 import 'package:whisper_cpp/whisper_cpp.dart';
 
+const int _kConsoleWidth = 79;
+
 class WhisperComputeConfig {
   final double kvSelfSize;
   final double kvCrossSize;
@@ -39,5 +41,29 @@ class WhisperComputeConfig {
       'computeBufferCross': computeBufferCross,
       'computeBufferDecode': computeBufferDecode,
     };
+  }
+
+  String toLog() {
+    int columnWidth = (_kConsoleWidth ~/ 2) - 3;
+
+    String logConfig = [
+      ['kv self size', ConversionHelper.getMB(kvSelfSize)],
+      ['kv cross size', ConversionHelper.getMB(kvCrossSize)],
+      ['compute buffer (conv)', ConversionHelper.getMB(computeBufferConv)],
+      ['compute buffer (encode)', ConversionHelper.getMB(computeBufferEncode)],
+      ['compute buffer (cross)', ConversionHelper.getMB(computeBufferCross)],
+      ['compute buffer (decode)', ConversionHelper.getMB(computeBufferDecode)]
+    ].map((item) {
+      return '| ${item[0].padRight(columnWidth)} | ${('${item[1]} MB').padRight(columnWidth)} |';
+    }).join('\n');
+
+    String logMessage = '\n';
+    logMessage += '+${''.padRight(columnWidth + 2, '-')}+'
+        '${''.padRight(columnWidth + 2, '-')}+\n';
+    logMessage += logConfig;
+    logMessage += '\n+${''.padRight(columnWidth + 2, '-')}+'
+        '${''.padRight(columnWidth + 2, '-')}+';
+
+    return logMessage;
   }
 }
