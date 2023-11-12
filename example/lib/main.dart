@@ -123,8 +123,13 @@ class _MyAppState extends State<MyApp> {
     _resultStreamSubscription = WhisperCpp.result.listen((
       WhisperResult? event,
     ) {
-      // print(event?.toJson() ?? '');
-      _result += event?.text ?? '';
+      if (event == null) return;
+
+      _result += event.text;
+      if (event.tokenData.id > event.tokenBeg) _result += '\n';
+
+      print('result: ${event.toLog()}');
+
       setState(() {});
     });
   }
@@ -133,9 +138,8 @@ class _MyAppState extends State<MyApp> {
     _summaryStreamSubscription = WhisperCpp.summary.listen((
       WhisperSummary? event,
     ) {
-      if(event == null) return;
+      if (event == null) return;
       print('summary: ${event.toLog()}');
-      
     });
   }
 
