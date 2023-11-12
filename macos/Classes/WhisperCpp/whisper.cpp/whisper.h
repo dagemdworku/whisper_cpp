@@ -124,6 +124,7 @@ extern "C" {
 
     typedef struct whisper_result {
         int64_t time;
+        int64_t token_beg;
         const char * text;
         whisper_token_data token_data;
     } whisper_result;

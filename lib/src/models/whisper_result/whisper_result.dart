@@ -4,11 +4,13 @@ const int _kConsoleWidth = 79;
 
 class WhisperResult {
   final int time;
+  final int tokenBeg;
   final String text;
   final WhisperTokenData tokenData;
 
   WhisperResult({
     required this.time,
+    required this.tokenBeg,
     required this.text,
     required this.tokenData,
   });
@@ -18,6 +20,7 @@ class WhisperResult {
 
     return WhisperResult(
       time: IntHandler.parse(json['time']),
+      tokenBeg: IntHandler.parse(json['tokenBeg']),
       text: json['text'],
       tokenData: WhisperTokenData.fromJson(json['tokenData']),
     );
@@ -26,6 +29,7 @@ class WhisperResult {
   Map<String, dynamic> toJson() {
     return {
       'time': time,
+      'tokenBeg': tokenBeg,
       'text': text,
       'tokenData': tokenData.toJson(),
     };
@@ -36,9 +40,10 @@ class WhisperResult {
 
     var logConfig = [
       ['id', tokenData.id.toString()],
+      ['tokenBeg', tokenBeg.toString()],
       ['text', text],
       ['probability', tokenData.p.toString()],
-      ['time offset', ConversionHelper.getMS(time).toString()],
+      ['time offset', '${ConversionHelper.getMS(time)} ms'],
       ['token length', tokenData.vlen.toString()],
       ['pt', tokenData.pt.toString()],
       ['pt sum', tokenData.ptsum.toString()],

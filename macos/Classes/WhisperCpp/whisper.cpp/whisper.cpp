@@ -5082,6 +5082,7 @@ int whisper_full_with_state(
                     
                     whisper_result* result = new whisper_result;
                     result->time = seek + 2*(tokens_cur[i].tid - whisper_token_beg(ctx));
+                    result->token_beg = whisper_token_beg(ctx);
                     result->text = ctx->vocab.id_to_token[tokens_cur[i].id].c_str();
                     result->token_data = tokens_cur[i];
                     
