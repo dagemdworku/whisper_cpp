@@ -46,10 +46,15 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
             result(whisperCppError(from: WhisperCppError.configurationError))
             return
         }
+        guard let isDebug = arguments["isDebug"] as? Bool else {
+            result(whisperCppError(from: WhisperCppError.configurationError))
+            return
+        }
+
 
         if whisperState == nil {
             do {
-                whisperState = try WhisperState(modelName: modelName)
+                whisperState = try WhisperState(modelName: modelName, isDebug: isDebug)
                 
                 registerIsRecordingEventChannel(whisperState: whisperState!)
                 registerStatusLogEventChannel(whisperState: whisperState!)

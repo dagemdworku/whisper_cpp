@@ -1,5 +1,7 @@
 import 'package:whisper_cpp/whisper_cpp.dart';
 
+const int _kConsoleWidth = 79;
+
 class WhisperConfig {
   final WhisperModelConfig modelConfig;
   final WhisperComputeConfig computeConfig;
@@ -23,5 +25,18 @@ class WhisperConfig {
       'modelConfig': modelConfig.toJson(),
       'computeConfig': computeConfig.toJson(),
     };
+  }
+
+  String toLog() {
+    int columnWidth = _kConsoleWidth - 2;
+
+    String logMessage = '\n';
+    logMessage += '+${''.padRight(columnWidth, '-')}+\n';
+    logMessage += '|${' model config'.padRight(columnWidth, ' ')}|';
+    logMessage += modelConfig.toLog();
+    logMessage += '\n|${' compute config'.padRight(columnWidth, ' ')}|';
+    logMessage += computeConfig.toLog();
+
+    return logMessage;
   }
 }

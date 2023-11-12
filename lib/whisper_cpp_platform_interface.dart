@@ -42,6 +42,7 @@ abstract class WhisperCppPlatform extends PlatformInterface {
 
   Future<WhisperConfig> initialize({
     required String modelName,
+    required bool isDebug,
   }) {
     throw UnimplementedError('initialize() has not been implemented.');
   }

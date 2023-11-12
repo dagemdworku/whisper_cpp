@@ -88,8 +88,9 @@ class _MyAppState extends State<MyApp> {
     try {
       WhisperConfig config = await _whisperCppPlugin.initialize(
         modelName: 'ggml-tiny.en',
+        isDebug: false,
       );
-      print(config.toJson());
+      print('config: ${config.toLog()}');
 
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
@@ -122,8 +123,13 @@ class _MyAppState extends State<MyApp> {
     _resultStreamSubscription = WhisperCpp.result.listen((
       WhisperResult? event,
     ) {
-      // print(event?.toJson() ?? '');
-      _result += event?.text ?? '';
+      if (event == null) return;
+
+      _result += event.text;
+      if (event.tokenData.id > event.tokenBeg) _result += '\n';
+
+      print('result: ${event.toLog()}');
+
       setState(() {});
     });
   }
@@ -132,9 +138,8 @@ class _MyAppState extends State<MyApp> {
     _summaryStreamSubscription = WhisperCpp.summary.listen((
       WhisperSummary? event,
     ) {
-      print(event?.toJson() ?? '');
-      print('load time: ${event?.loadTime}');
-      
+      if (event == null) return;
+      print('summary: ${event.toLog()}');
     });
   }
 

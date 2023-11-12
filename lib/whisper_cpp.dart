@@ -31,9 +31,13 @@ class WhisperCpp {
 
   Future<WhisperConfig> initialize({
     String modelName = 'ggml-tiny.en',
+    bool isDebug = false,
   }) {
     if (Platform.isMacOS || Platform.isIOS) {
-      return WhisperCppPlatform.instance.initialize(modelName: modelName);
+      return WhisperCppPlatform.instance.initialize(
+        modelName: modelName,
+        isDebug: isDebug,
+      );
     }
     throw WhisperCppException.platformNotSupported();
   }

@@ -124,6 +124,7 @@ extern "C" {
 
     typedef struct whisper_result {
         int64_t time;
+        int64_t token_beg;
         const char * text;
         whisper_token_data token_data;
     } whisper_result;
@@ -156,7 +157,7 @@ extern "C" {
     // Various functions for loading a ggml whisper model.
     // Allocate (almost) all memory needed for the model.
     // Return NULL on failure
-    WHISPER_API struct whisper_config * whisper_init_from_file(const char * path_model);
+    WHISPER_API struct whisper_config * whisper_init_from_file(const char * path_model, bool is_debug);
     WHISPER_API struct whisper_config * whisper_init_from_buffer(void * buffer, size_t buffer_size);
     WHISPER_API struct whisper_config * whisper_init(struct whisper_model_loader * loader);
 

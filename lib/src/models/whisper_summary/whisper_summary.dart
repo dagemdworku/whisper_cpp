@@ -1,5 +1,7 @@
 import 'package:whisper_cpp/whisper_cpp.dart';
 
+const int _kConsoleWidth = 79;
+
 class WhisperSummary {
   int tSampleUs;
   int nSample;
@@ -33,15 +35,11 @@ class WhisperSummary {
     required this.tMelUs,
   });
 
-  double get sampleTimePerRun => tSampleUs / 1000.0 / nSample;
-  double get encodeTimePerRun => tEncodeUs / 1000.0 / nEncode;
-  double get decodeTimePerRun => tDecodeUs / 1000.0 / nDecode;
-  double get promptTimePerRun => tPromptUs / 1000.0 / nPrompt;
-  double get totalTime => (tEndUs - tStartUs) / 1000.0;
-
-  double get loadTime => tLoadUs / 1000.0;
-  String get fallbacks => '$nFailP p / $nFailH h';
-  double get melTime => tMelUs / 1000.0;
+  double get sampleTimePerRun => tSampleUs / nSample;
+  double get encodeTimePerRun => tEncodeUs / nEncode;
+  double get decodeTimePerRun => tDecodeUs / nDecode;
+  double get promptTimePerRun => tPromptUs / nPrompt;
+  double get totalTime => tEndUs - tStartUs + 0.0;
 
   factory WhisperSummary.fromJson(Map<Object?, Object?>? data) {
     Map<String, dynamic> json = Map<String, dynamic>.from(data as Map);
@@ -81,5 +79,52 @@ class WhisperSummary {
       'tLoadUs': tLoadUs,
       'tMelUs': tMelUs,
     };
+  }
+
+  String toLog() {
+    int columnWidth = (_kConsoleWidth ~/ 2) - 3;
+
+
+    var logConfig = [
+      ['load time', '${ConversionHelper.getMS(tLoadUs)} ms'],
+      ['fallbacks (p/h)', '$nFailP / $nFailH'],
+      ['mel time', '${ConversionHelper.getMS(tMelUs)} ms'],
+      [
+        'sample time / runs / time per run',
+        '${'${ConversionHelper.getMS(tSampleUs)} ms'.padRight(11)} / '
+        '${nSample.toString().padRight(5)} / '
+        '${'${ConversionHelper.getMS(sampleTimePerRun)} ms'.padRight(12)}'
+      ],
+      [
+        'encode time / runs / time per run',
+        '${'${ConversionHelper.getMS(tEncodeUs)} ms'.padRight(11)} / '
+        '${nEncode.toString().padRight(5)} / '
+        '${'${ConversionHelper.getMS(encodeTimePerRun)} ms'.padRight(12)}'
+      ],
+      [
+        'decode time / runs / time per run',
+        '${'${ConversionHelper.getMS(tDecodeUs)} ms'.padRight(11)} / '
+        '${nDecode.toString().padRight(5)} / '
+        '${'${ConversionHelper.getMS(decodeTimePerRun)} ms'.padRight(12)}'
+      ],
+      [
+        'prompt time / runs / time per run',
+        '${'${ConversionHelper.getMS(tPromptUs)} ms'.padRight(11)} / '
+        '${nPrompt.toString().padRight(5)} / '
+        '${'${ConversionHelper.getMS(promptTimePerRun)} ms'.padRight(12)}'
+      ],
+      ['total time', '${ConversionHelper.getMS(totalTime)} ms']
+    ].map((item) {
+      return '| ${item[0].padRight(columnWidth)} | ${(item[1]).padRight(columnWidth)} |';
+    }).join('\n');
+
+    String logMessage = '\n';
+    logMessage += '+${''.padRight(columnWidth + 2, '-')}+'
+        '${''.padRight(columnWidth + 2, '-')}+\n';
+    logMessage += logConfig;
+    logMessage += '\n+${''.padRight(columnWidth + 2, '-')}+'
+        '${''.padRight(columnWidth + 2, '-')}+';
+
+    return logMessage;
   }
 }

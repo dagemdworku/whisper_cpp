@@ -26,10 +26,14 @@ actor WhisperContext {
     
     // Function to transcribe samples
     // Uses a maximum of 8 threads, leaving 2 processors free
-    func fullTranscribe(samples: [Float], state: WhisperState) -> WhisperSummary? {
+    func fullTranscribe(samples: [Float], state: WhisperState, isDebug: Bool) -> WhisperSummary? {
         // Leave 2 processors free (i.e. the high-efficiency cores).
         let maxThreads = max(1, min(8, cpuCount() - 2))
-        print("Selecting \(maxThreads) threads")
+        
+        if(isDebug){
+            print("Selecting \(maxThreads) threads")
+        }
+        
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
         
         var summary: WhisperSummary?
@@ -50,7 +54,11 @@ actor WhisperContext {
             params.tdrz_enable = true
             
             whisper_reset_timings(context)
-            print("About to run whisper_full")
+            
+            if(isDebug){
+                print("About to run whisper_full")
+            }
+            
             samples.withUnsafeBufferPointer { samples in
                 WhisperContext.state = state;
                 
@@ -70,9 +78,7 @@ actor WhisperContext {
             await state?.updateResult(with: log!.pointee)
         }
     }
-    
-    typealias WhisperTranscriptionLogCallback = @convention(c) (UnsafePointer<CChar>) -> Void
-    
+        
     // Function to get transcription
     // Concatenates all segments of the transcription
     func getTranscription() -> String {
@@ -85,8 +91,8 @@ actor WhisperContext {
     
     // Static function to create a new WhisperContext
     // Throws an error if the context could not be initialized
-    static func createContext(path: String) throws -> WhisperConfig {
-        guard let resultOpaquePtr = whisper_init_from_file(path) else {
+    static func createContext(path: String, isDebug: Bool) throws -> WhisperConfig {
+        guard let resultOpaquePtr = whisper_init_from_file(path, isDebug) else {
             print("Couldn't load model at \(path)")
             throw WhisperError.couldNotInitializeContext
         }

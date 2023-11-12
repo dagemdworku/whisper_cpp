@@ -38,9 +38,11 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   @override
   Future<WhisperConfig> initialize({
     required String modelName,
+    required bool isDebug,
   }) async {
     Map<String, dynamic> arguments = {
       'modelName': modelName,
+      'isDebug': isDebug,
     };
 
     try {
@@ -84,7 +86,6 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   @override
   Stream<WhisperSummary?> get summary {
     return summaryEventChannel.receiveBroadcastStream().map((event) {
-      print(event);
       return event is Map ? WhisperSummary.fromJson(event) : null;
     });
   }
