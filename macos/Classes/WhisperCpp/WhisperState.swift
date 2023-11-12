@@ -22,6 +22,8 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     private let recorder = Recorder()  // The audio recorder
     private var recordedFile: URL? = nil  // The URL of the recorded audio file
     private var audioPlayer: AVAudioPlayer?  // The audio player for playback of recorded audio
+
+    private var isDebug = false  // Indicates if the app is running in debug mode
     
     // The URL of the sample audio file
     private var sampleUrl: URL? {
@@ -34,8 +36,10 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
     
     // Initialize the WhisperState
-    init(modelName: String) throws {
+    init(modelName: String, isDebug: Bool) throws {
         super.init()
+
+        self.isDebug = isDebug
         
         do {
             self.whisperConfig = try loadModel(modelName: modelName)
@@ -57,7 +61,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         }
         
         if let modelUrl {
-            let result: WhisperConfig = try WhisperContext.createContext(path: modelUrl.path())
+            let result: WhisperConfig = try WhisperContext.createContext(path: modelUrl.path(), isDebug: isDebug)
             whisperContext = result.whisperContext
             messageLog += "Loaded model \(modelUrl.lastPathComponent)\n"
             statusLog = "Loaded model \(modelUrl.lastPathComponent)"

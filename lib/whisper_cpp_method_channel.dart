@@ -38,9 +38,11 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   @override
   Future<WhisperConfig> initialize({
     required String modelName,
+    required bool isDebug,
   }) async {
     Map<String, dynamic> arguments = {
       'modelName': modelName,
+      'isDebug': isDebug,
     };
 
     try {

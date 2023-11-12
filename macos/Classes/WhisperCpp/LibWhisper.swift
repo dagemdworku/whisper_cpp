@@ -85,8 +85,8 @@ actor WhisperContext {
     
     // Static function to create a new WhisperContext
     // Throws an error if the context could not be initialized
-    static func createContext(path: String) throws -> WhisperConfig {
-        guard let resultOpaquePtr = whisper_init_from_file(path) else {
+    static func createContext(path: String, isDebug: Bool) throws -> WhisperConfig {
+        guard let resultOpaquePtr = whisper_init_from_file(path, isDebug) else {
             print("Couldn't load model at \(path)")
             throw WhisperError.couldNotInitializeContext
         }

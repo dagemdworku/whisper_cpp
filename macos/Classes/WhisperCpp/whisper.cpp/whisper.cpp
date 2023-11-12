@@ -776,7 +776,7 @@ static void whisper_default_log(const char * text) {
     fprintf(stderr, "%s", text);
 }
 
-static whisper_log_callback whisper_log = whisper_default_log;
+static whisper_log_callback whisper_log;
 
 #ifdef __GNUC__
 #ifdef __MINGW32__
@@ -3174,7 +3174,9 @@ struct whisper_config * _whisper_init(whisper_context * ctx, whisper_config* res
     return result;
 }
 
-struct whisper_config * whisper_init_from_file(const char * path_model) {
+struct whisper_config * whisper_init_from_file(const char * path_model, bool is_debug) {
+    if(is_debug) whisper_log = whisper_default_log;
+    
     whisper_config* config = new whisper_config;
     whisper_context * ctx = whisper_init_from_file_no_state(path_model, &config->model_config);
     return _whisper_init(ctx, config);

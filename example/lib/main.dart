@@ -88,6 +88,7 @@ class _MyAppState extends State<MyApp> {
     try {
       WhisperConfig config = await _whisperCppPlugin.initialize(
         modelName: 'ggml-tiny.en',
+        isDebug: true,
       );
       print('config: ${config.toLog()}');
 
