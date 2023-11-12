@@ -8,6 +8,7 @@ const String _kMethodChannelName = 'plugins.dagemdworku.io/whisper_cpp';
 const String _kIsRecordingEvent = 'whisper_cpp_is_recording_event';
 const String _kStatusLogEvent = 'whisper_cpp_status_log_event';
 const String _kResultEvent = 'whisper_cpp_result_event';
+const String _kSummaryEvent = 'whisper_cpp_summary_event';
 
 /// An implementation of [WhisperCppPlatform] that uses method channels.
 class MethodChannelWhisperCpp extends WhisperCppPlatform {
@@ -23,6 +24,9 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   final EventChannel resultEventChannel =
       const EventChannel('$_kMethodChannelName/token/$_kResultEvent');
+
+  final EventChannel summaryEventChannel =
+      const EventChannel('$_kMethodChannelName/token/$_kSummaryEvent');
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -73,8 +77,15 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   @override
   Stream<WhisperResult?> get result {
     return resultEventChannel.receiveBroadcastStream().map((event) {
-      print(event);
       return event is Map ? WhisperResult.fromJson(event) : null;
+    });
+  }
+
+  @override
+  Stream<WhisperSummary?> get summary {
+    return summaryEventChannel.receiveBroadcastStream().map((event) {
+      print(event);
+      return event is Map ? WhisperSummary.fromJson(event) : null;
     });
   }
 }

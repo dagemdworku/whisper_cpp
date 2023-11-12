@@ -5,6 +5,7 @@ let kFLTWhisperCppMethodChannelName = "plugins.dagemdworku.io/whisper_cpp"
 let kFLTWhisperCppIsRecordingEvent = "whisper_cpp_is_recording_event"
 let kFLTWhisperCppStatusLogEvent = "whisper_cpp_status_log_event"
 let kFLTWhisperCppResultEvent = "whisper_cpp_result_event"
+let kFLTWhisperCppSummaryEvent = "whisper_cpp_summary_event"
 
 public class WhisperCppPlugin: NSObject, FlutterPlugin {
     private var whisperState: WhisperState?
@@ -53,6 +54,7 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
                 registerIsRecordingEventChannel(whisperState: whisperState!)
                 registerStatusLogEventChannel(whisperState: whisperState!)
                 registerResultEventChannel(whisperState: whisperState!)
+                registerSummaryEventChannel(whisperState: whisperState!)
                 
                 let whisperConfigDict: [String: Any] = [
                     "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
@@ -99,6 +101,12 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppResultEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(ResultStreamHandler(whisperState: whisperState))
+    }
+    
+    private func registerSummaryEventChannel(whisperState: WhisperState) {
+        let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppSummaryEvent
+        let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
+        eventChannel.setStreamHandler(SummaryStreamHandler(whisperState: whisperState))
     }
     
     private func flutterError(from error: Error) -> FlutterError {
