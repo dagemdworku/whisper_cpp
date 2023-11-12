@@ -86,7 +86,6 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   @override
   Stream<WhisperSummary?> get summary {
     return summaryEventChannel.receiveBroadcastStream().map((event) {
-      print(event);
       return event is Map ? WhisperSummary.fromJson(event) : null;
     });
   }

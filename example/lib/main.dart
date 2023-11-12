@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
     try {
       WhisperConfig config = await _whisperCppPlugin.initialize(
         modelName: 'ggml-tiny.en',
-        isDebug: true,
+        isDebug: false,
       );
       print('config: ${config.toLog()}');
 
@@ -133,8 +133,8 @@ class _MyAppState extends State<MyApp> {
     _summaryStreamSubscription = WhisperCpp.summary.listen((
       WhisperSummary? event,
     ) {
-      print(event?.toJson() ?? '');
-      print('load time: ${event?.loadTime}');
+      if(event == null) return;
+      print('summary: ${event.toLog()}');
       
     });
   }

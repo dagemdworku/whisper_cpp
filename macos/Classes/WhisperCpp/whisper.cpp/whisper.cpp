@@ -3644,25 +3644,28 @@ whisper_summary whisper_print_timings(struct whisper_context * ctx) {
 
     whisper_summary summary;
 
-    summary.t_sample_us = ctx->state->t_sample_us;
-    summary.n_sample = std::max(1, ctx->state->n_sample);
-    summary.t_encode_us = ctx->state->t_encode_us;
-    summary.n_encode = std::max(1, ctx->state->n_encode);
-    summary.t_decode_us = ctx->state->t_decode_us;
-    summary.n_decode = std::max(1, ctx->state->n_decode);
-    summary.t_prompt_us = ctx->state->t_prompt_us;
-    summary.n_prompt = std::max(1, ctx->state->n_prompt);
     summary.t_start_us = ctx->t_start_us;
     summary.t_end_us = t_end_us;
+    
+    summary.t_load_us = ctx->t_load_us;
 
     log("\n");
     log("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
     if (ctx->state != nullptr) {
+        summary.t_sample_us = ctx->state->t_sample_us;
+        summary.t_encode_us = ctx->state->t_encode_us;
+        summary.t_decode_us = ctx->state->t_decode_us;
+        summary.t_prompt_us = ctx->state->t_prompt_us;
 
-        const int32_t n_sample = std::max(1, ctx->state->n_sample);
-        const int32_t n_encode = std::max(1, ctx->state->n_encode);
-        const int32_t n_decode = std::max(1, ctx->state->n_decode);
-        const int32_t n_prompt = std::max(1, ctx->state->n_prompt);
+        summary.n_fail_p = ctx->state->n_fail_p;
+        summary.n_fail_h = ctx->state->n_fail_h;
+        
+        summary.t_mel_us = ctx->state->t_mel_us;
+
+        const int32_t n_sample = summary.n_sample = std::max(1, ctx->state->n_sample);
+        const int32_t n_encode = summary.n_encode = std::max(1, ctx->state->n_encode);
+        const int32_t n_decode = summary.n_decode = std::max(1, ctx->state->n_decode);
+        const int32_t n_prompt = summary.n_prompt = std::max(1, ctx->state->n_prompt);
 
         log("%s:     fallbacks = %3d p / %3d h\n", __func__, ctx->state->n_fail_p, ctx->state->n_fail_h);
         log("%s:      mel time = %8.2f ms\n", __func__, ctx->state->t_mel_us / 1000.0f);
@@ -3671,6 +3674,7 @@ whisper_summary whisper_print_timings(struct whisper_context * ctx) {
         log("%s:   decode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_decode_us, n_decode, 1e-3f * ctx->state->t_decode_us / n_decode);
         log("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
     }
+
     log("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
 
     return summary;
@@ -5090,7 +5094,7 @@ int whisper_full_with_state(
                             const auto tt0 = params.speed_up ? 2*t0 : t0;
                             const auto tt1 = params.speed_up ? 2*t1 : t1;
 
-                            if (params.print_realtime) {
+                            if (params.print_realtime && whisper_log) {
                                 if (params.print_timestamps) {
                                     printf("[%s --> %s]  %s\n", to_timestamp(tt0).c_str(), to_timestamp(tt1).c_str(), text.c_str());
                                 } else {
@@ -5137,7 +5141,7 @@ int whisper_full_with_state(
                     const auto tt0 = params.speed_up ? 2*t0 : t0;
                     const auto tt1 = params.speed_up ? 2*t1 : t1;
 
-                    if (params.print_realtime) {
+                    if (params.print_realtime && whisper_log) {
                         if (params.print_timestamps) {
                             printf("[%s --> %s]  %s\n", to_timestamp(tt0).c_str(), to_timestamp(tt1).c_str(), text.c_str());
                         } else {
