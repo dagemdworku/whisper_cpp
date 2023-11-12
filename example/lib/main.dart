@@ -21,11 +21,13 @@ class _MyAppState extends State<MyApp> {
   final _whisperCppPlugin = WhisperCpp();
 
   late StreamSubscription<bool> _isRecordingStreamSubscription;
+  late StreamSubscription<WhisperResult?> _resultStreamSubscription;
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
 
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
   String _statusLog = '';
+  String _result = '';
 
   @override
   void initState() {
@@ -72,6 +74,8 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: Text(_isRecording ? 'Stop' : 'Start'),
               ),
+              const Divider(),
+              Text('Result: $_result\n'),
             ],
           ),
         ),
@@ -88,6 +92,7 @@ class _MyAppState extends State<MyApp> {
 
       _registerIsRecordingChangeListener();
       _registerStatusLogChangeListener();
+      _registerResultChangeListener();
     } on WhisperCppException catch (e) {
       print('WhisperCppException code: ${e.code}');
       print('WhisperCppException message: ${e.message}');
@@ -111,10 +116,21 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _registerResultChangeListener() {
+    _resultStreamSubscription = WhisperCpp.result.listen((
+      WhisperResult? event,
+    ) {
+      print(event?.toJson() ?? '');
+      _result += event?.text ?? '';
+      setState(() {});
+    });
+  }
+
   @override
   void dispose() {
     _isRecordingStreamSubscription.cancel();
     _statusLogStreamSubscription.cancel();
+    _resultStreamSubscription.cancel();
     super.dispose();
   }
 }
