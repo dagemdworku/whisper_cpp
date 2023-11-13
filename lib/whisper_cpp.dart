@@ -60,4 +60,11 @@ class WhisperCpp {
     }
     throw WhisperCppException.platformNotSupported();
   }
+
+  Future<void> transcribe() {
+    if (Platform.isMacOS || Platform.isIOS) {
+      return WhisperCppPlatform.instance.transcribe();
+    }
+    throw WhisperCppException.platformNotSupported();
+  }
 }

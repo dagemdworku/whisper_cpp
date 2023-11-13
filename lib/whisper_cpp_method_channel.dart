@@ -71,6 +71,15 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   }
 
   @override
+  Future<void> transcribe() async {
+    try {
+      return await methodChannel.invokeMethod<void>('transcribe');
+    } on PlatformException catch (e) {
+      throw WhisperCppException.mapToWhisperCppException(e.code);
+    }
+  }
+
+  @override
   Stream<bool> get isRecording {
     return isRecordingEventChannel.receiveBroadcastStream().map((event) {
       return event is bool ? event : false;

@@ -34,6 +34,8 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
             initialize(call: call, result: result)
         case "toggleRecord":
             toggleRecord(result: result)
+        case "transcribe":
+            transcribe(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -86,6 +88,21 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
             Task {
                 do {
                     await self.whisperState!.toggleRecord()
+                    DispatchQueue.main.async {
+                        result(nil)
+                    }
+                }
+            }
+        }
+    }
+    
+    @MainActor private func transcribe(result: @escaping FlutterResult) {
+        if whisperState == nil {
+            result(whisperCppError(from: WhisperCppError.notInitialized))
+        } else {
+            Task {
+                do {
+                    await self.whisperState!.transcribe()
                     DispatchQueue.main.async {
                         result(nil)
                     }

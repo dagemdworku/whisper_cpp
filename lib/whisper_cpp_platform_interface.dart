@@ -59,4 +59,8 @@ abstract class WhisperCppPlatform extends PlatformInterface {
   Future<void> toggleRecord() {
     throw UnimplementedError('toggleRecord() has not been implemented.');
   }
+
+  Future<void> transcribe() {
+    throw UnimplementedError('transcribe() has not been implemented.');
+  }
 }
