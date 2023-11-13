@@ -111,7 +111,8 @@ class _MyAppState extends State<MyApp> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     _statusLog,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12.0),
+                    style:
+                        TextStyle(color: Colors.grey.shade600, fontSize: 12.0),
                   ),
                 ),
               ),
@@ -161,7 +162,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildTranscription(List<WhisperResult> transcription) {
-    String text = transcription.map((e) => e.text).join();
+    String text = transcription.map((e) => e.textOnly).join().trim();
+    List<String> specialCharacters =
+        transcription.map((e) => e.specialCharacters).expand((e) => e).toList();
     String startTimestamp = TimestampHelper.fromInt(transcription.first.time);
     String endTimestamp = TimestampHelper.fromInt(transcription.last.time);
 
@@ -171,7 +174,7 @@ class _MyAppState extends State<MyApp> {
         Text(text.trim()),
         const SizedBox(height: 4.0),
         Text(
-          '$startTimestamp - $endTimestamp',
+          '[$startTimestamp - $endTimestamp] ${specialCharacters.join(' ')}',
           style: const TextStyle(fontSize: 12.0, color: Colors.grey),
         ),
       ],
