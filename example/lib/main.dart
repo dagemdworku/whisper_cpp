@@ -82,6 +82,12 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: Text(_isRecording ? 'Stop' : 'Start'),
               ),
+              ElevatedButton(
+                onPressed: _canTranscribe ? () async {
+                  await _whisperCppPlugin.transcribe();
+                } : null,
+                child: const Text('Transcribe'),
+              ),
               const Divider(),
               Text('Result: $_result\n'),
             ],
