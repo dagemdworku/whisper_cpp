@@ -17,6 +17,10 @@ class WhisperCpp {
     return WhisperCppPlatform.instance.isModelLoaded;
   }
 
+  static Stream<bool> get canTranscribe {
+    return WhisperCppPlatform.instance.canTranscribe;
+  }
+
   static Stream<String> get statusLog {
     return WhisperCppPlatform.instance.statusLog;
   }

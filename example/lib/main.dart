@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
 
   late StreamSubscription<bool> _isRecordingStreamSubscription;
   late StreamSubscription<bool> _isModelLoadedStreamSubscription;
+  late StreamSubscription<bool> _canTranscribeStreamSubscription;
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
   late StreamSubscription<WhisperResult?> _resultStreamSubscription;
   late StreamSubscription<List<WhisperResult>> _resultsStreamSubscription;
@@ -30,6 +31,7 @@ class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
   bool _isModelLoaded = false;
+  bool _canTranscribe = false;
   String _statusLog = '';
   String _result = '';
 
@@ -68,6 +70,7 @@ class _MyAppState extends State<MyApp> {
               Text('Running on: $_platformVersion\n'),
               Text('Is Recording: $_isRecording\n'),
               Text('Is Model Loaded: $_isModelLoaded\n'),
+              Text('Can Transcribe: $_canTranscribe\n'),
               Text('Status: $_statusLog\n'),
               ElevatedButton(
                 onPressed: _initialize,
@@ -98,6 +101,7 @@ class _MyAppState extends State<MyApp> {
 
       _registerIsRecordingChangeListener();
       _registerIsModelLoadedChangeListener();
+      _registerCanTranscribeChangeListener();
       _registerStatusLogChangeListener();
       // _registerResultChangeListener();
       _registerResultsChangeListener();
@@ -122,6 +126,14 @@ class _MyAppState extends State<MyApp> {
     _isModelLoadedStreamSubscription =
         WhisperCpp.isModelLoaded.listen((bool event) {
       _isModelLoaded = event;
+      setState(() {});
+    });
+  }
+
+  void _registerCanTranscribeChangeListener() {
+    _canTranscribeStreamSubscription =
+        WhisperCpp.canTranscribe.listen((bool event) {
+      _canTranscribe = event;
       setState(() {});
     });
   }
@@ -173,6 +185,7 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     _isRecordingStreamSubscription.cancel();
     _isModelLoadedStreamSubscription.cancel();
+    _canTranscribeStreamSubscription.cancel();
     _statusLogStreamSubscription.cancel();
     _resultStreamSubscription.cancel();
     _resultsStreamSubscription.cancel();

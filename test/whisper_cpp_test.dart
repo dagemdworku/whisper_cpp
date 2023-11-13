@@ -42,6 +42,10 @@ class MockWhisperCppPlatform
   @override
   // TODO: implement isModelLoaded
   Stream<bool> get isModelLoaded => throw UnimplementedError();
+  
+  @override
+  // TODO: implement canTranscribe
+  Stream<bool> get canTranscribe => throw UnimplementedError();
 }
 
 void main() {

@@ -7,6 +7,7 @@ import 'whisper_cpp_platform_interface.dart';
 const String _kMethodChannelName = 'plugins.dagemdworku.io/whisper_cpp';
 const String _kIsRecordingEvent = 'whisper_cpp_is_recording_event';
 const String _kIsModelLoadedEvent = 'whisper_cpp_is_model_loaded_event';
+const String _kCanTranscribeEvent = 'whisper_cpp_can_transcribe_event';
 const String _kStatusLogEvent = 'whisper_cpp_status_log_event';
 const String _kResultEvent = 'whisper_cpp_result_event';
 const String _kSummaryEvent = 'whisper_cpp_summary_event';
@@ -22,6 +23,9 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   final EventChannel isModelLoadedEventChannel =
       const EventChannel('$_kMethodChannelName/token/$_kIsModelLoadedEvent');
+
+  final EventChannel canTranscribeEventChannel =
+      const EventChannel('$_kMethodChannelName/token/$_kCanTranscribeEvent');
 
   final EventChannel statusLogEventChannel =
       const EventChannel('$_kMethodChannelName/token/$_kStatusLogEvent');
@@ -67,6 +71,13 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   }
 
   @override
+  Stream<bool> get isRecording {
+    return isRecordingEventChannel.receiveBroadcastStream().map((event) {
+      return event is bool ? event : false;
+    });
+  }
+
+  @override
   Stream<bool> get isModelLoaded {
     return isModelLoadedEventChannel.receiveBroadcastStream().map((event) {
       return event is bool ? event : false;
@@ -74,8 +85,8 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   }
 
   @override
-  Stream<bool> get isRecording {
-    return isRecordingEventChannel.receiveBroadcastStream().map((event) {
+  Stream<bool> get canTranscribe {
+    return canTranscribeEventChannel.receiveBroadcastStream().map((event) {
       return event is bool ? event : false;
     });
   }
