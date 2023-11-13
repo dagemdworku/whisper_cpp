@@ -13,6 +13,15 @@ class WhisperResult {
     required this.tokenData,
   });
 
+  String get textOnly {
+    return text.replaceAll(RegExp(r'\[.*?\]'), '');
+  }
+
+  List<String> get specialCharacters {
+    Iterable<Match> matches = RegExp(r'\[.*?\]').allMatches(text);
+    return matches.map((m) => m.group(0)!).toList();
+  }
+
   factory WhisperResult.fromJson(Map<Object?, Object?>? data) {
     Map<String, dynamic> json = Map<String, dynamic>.from(data as Map);
 
