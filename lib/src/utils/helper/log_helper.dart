@@ -20,6 +20,17 @@ abstract class LogHelper {
     return content;
   }
 
+  static String getHeader() {
+    int columnWidth = _kConsoleWidth - 2;
+    return '+${''.padRight(columnWidth, '-')}+';
+  }
+
+  static String parseTableHeader(String title) {
+    int columnWidth = _kConsoleWidth - 2;
+
+    return '|${' $title'.padRight(columnWidth, ' ')}|';
+  }
+
   static List<List<String>> _spiteContent(
     Map<String, String> map,
     int columnWidth,
@@ -27,10 +38,7 @@ abstract class LogHelper {
     List<List<String>> content = [];
 
     map.forEach((key, value) {
-      List<String> values = RegExp('.{1,$columnWidth}')
-          .allMatches(value.trim())
-          .map((m) => m.group(0) ?? '')
-          .toList();
+      List<String> values = _splitContent(value, columnWidth);
 
       for (int i = 0; i < values.length; i++) {
         if (i == 0) {
@@ -42,5 +50,12 @@ abstract class LogHelper {
     });
 
     return content;
+  }
+
+  static List<String> _splitContent(String content, int columnWidth) {
+    return RegExp('.{1,$columnWidth}')
+        .allMatches(content.trim())
+        .map((m) => m.group(0) ?? '')
+        .toList();
   }
 }
