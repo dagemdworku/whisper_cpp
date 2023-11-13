@@ -27,6 +27,12 @@ abstract class WhisperCppPlatform extends PlatformInterface {
   Stream<bool> get isRecording =>
       throw UnimplementedError('get isRecording stream is not implemented');
 
+  Stream<bool> get isModelLoaded =>
+      throw UnimplementedError('get isModelLoaded stream is not implemented');
+
+  Stream<bool> get canTranscribe =>
+      throw UnimplementedError('get canTranscribe stream is not implemented');
+
   Stream<String> get statusLog =>
       throw UnimplementedError('get statusLog stream is not implemented');
 
@@ -35,7 +41,7 @@ abstract class WhisperCppPlatform extends PlatformInterface {
 
   Stream<List<WhisperResult>> get results =>
       throw UnimplementedError('get results stream is not implemented');
-      
+
   Stream<WhisperSummary?> get summary =>
       throw UnimplementedError('get summary stream is not implemented');
 

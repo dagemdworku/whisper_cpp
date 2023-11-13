@@ -9,10 +9,16 @@ export 'src/models/models.dart';
 export 'src/utils/utils.dart';
 
 class WhisperCpp {
-  
-
   static Stream<bool> get isRecording {
     return WhisperCppPlatform.instance.isRecording;
+  }
+
+  static Stream<bool> get isModelLoaded {
+    return WhisperCppPlatform.instance.isModelLoaded;
+  }
+
+  static Stream<bool> get canTranscribe {
+    return WhisperCppPlatform.instance.canTranscribe;
   }
 
   static Stream<String> get statusLog {

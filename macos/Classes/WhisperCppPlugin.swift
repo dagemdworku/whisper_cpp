@@ -3,6 +3,8 @@ import FlutterMacOS
 
 let kFLTWhisperCppMethodChannelName = "plugins.dagemdworku.io/whisper_cpp"
 let kFLTWhisperCppIsRecordingEvent = "whisper_cpp_is_recording_event"
+let kFLTWhisperCppIsModelLoadedEvent = "whisper_cpp_is_model_loaded_event"
+let kFLTWhisperCppCanTranscribeEvent = "whisper_cpp_can_transcribe_event"
 let kFLTWhisperCppStatusLogEvent = "whisper_cpp_status_log_event"
 let kFLTWhisperCppResultEvent = "whisper_cpp_result_event"
 let kFLTWhisperCppSummaryEvent = "whisper_cpp_summary_event"
@@ -57,6 +59,8 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
                 whisperState = try WhisperState(modelName: modelName, isDebug: isDebug)
                 
                 registerIsRecordingEventChannel(whisperState: whisperState!)
+                registerIsModelLoadedEventChannel(whisperState: whisperState!)
+                registerCanTranscribeEventChannel(whisperState: whisperState!)
                 registerStatusLogEventChannel(whisperState: whisperState!)
                 registerResultEventChannel(whisperState: whisperState!)
                 registerSummaryEventChannel(whisperState: whisperState!)
@@ -94,6 +98,18 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppIsRecordingEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(IsRecordingStreamHandler(whisperState: whisperState))
+    }
+    
+    private func registerIsModelLoadedEventChannel(whisperState: WhisperState) {
+        let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppIsModelLoadedEvent
+        let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
+        eventChannel.setStreamHandler(IsModelLoadedStreamHandler(whisperState: whisperState))
+    }
+    
+    private func registerCanTranscribeEventChannel(whisperState: WhisperState) {
+        let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppCanTranscribeEvent
+        let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
+        eventChannel.setStreamHandler(CanTranscribeStreamHandler(whisperState: whisperState))
     }
     
     private func registerStatusLogEventChannel(whisperState: WhisperState) {
