@@ -83,36 +83,23 @@ class WhisperModelConfig {
   }
 
   String toLog() {
-    int columnWidth = (_kConsoleWidth ~/ 2) - 3;
-
-    String logConfig = [
-      ['n_vocab', nVocab.toString()],
-      ['n_audio_ctx', nAudioCtx.toString()],
-      ['n_audio_state', nAudioState.toString()],
-      ['n_audio_head', nAudioHead.toString()],
-      ['n_audio_layer', nAudioLayer.toString()],
-      ['n_text_ctx', nTextCtx.toString()],
-      ['n_text_state', nTextState.toString()],
-      ['n_text_head', nTextHead.toString()],
-      ['n_text_layer', nTextLayer.toString()],
-      ['n_mels', nMels.toString()],
-      ['ftype', ftype.toString()],
-      ['qntvr', qntvr.toString()],
-      ['type', type.toString()],
-      ['extra_tokens', extraTokens.toString()],
-      ['model_ctx', ConversionHelper.getMB(modelCtx).toString()],
-      ['model_size', ConversionHelper.getMB(modelSize).toString()]
-    ].map((item) {
-      return '| ${item[0].padRight(columnWidth)} | ${('${item[1]} MB').padRight(columnWidth)} |';
-    }).join('\n');
-
-    String logMessage = '\n';
-    logMessage += '+${''.padRight(columnWidth + 2, '-')}+'
-        '${''.padRight(columnWidth + 2, '-')}+\n';
-    logMessage += logConfig;
-    logMessage += '\n+${''.padRight(columnWidth + 2, '-')}+'
-        '${''.padRight(columnWidth + 2, '-')}+';
-
-    return logMessage;
+    return LogHelper.parseTableContent({
+      'n_vocab': nVocab.toString(),
+      'n_audio_ctx': nAudioCtx.toString(),
+      'n_audio_state': nAudioState.toString(),
+      'n_audio_head': nAudioHead.toString(),
+      'n_audio_layer': nAudioLayer.toString(),
+      'n_text_ctx': nTextCtx.toString(),
+      'n_text_state': nTextState.toString(),
+      'n_text_head': nTextHead.toString(),
+      'n_text_layer': nTextLayer.toString(),
+      'n_mels': nMels.toString(),
+      'ftype': ftype.toString(),
+      'qntvr': qntvr.toString(),
+      'type': type.toString(),
+      'extra_tokens': extraTokens.toString(),
+      'model_ctx': ConversionHelper.getMB(modelCtx).toString(),
+      'model_size': ConversionHelper.getMB(modelSize).toString()
+    });
   }
 }

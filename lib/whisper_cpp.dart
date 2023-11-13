@@ -9,6 +9,8 @@ export 'src/models/models.dart';
 export 'src/utils/utils.dart';
 
 class WhisperCpp {
+  
+
   static Stream<bool> get isRecording {
     return WhisperCppPlatform.instance.isRecording;
   }
@@ -19,6 +21,10 @@ class WhisperCpp {
 
   static Stream<WhisperResult?> get result {
     return WhisperCppPlatform.instance.result;
+  }
+
+  static Stream<List<WhisperResult>> get results {
+    return ResultStreamHandler(result).whisperResultStream;
   }
 
   static Stream<WhisperSummary?> get summary {

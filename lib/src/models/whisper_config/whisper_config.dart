@@ -1,7 +1,5 @@
 import 'package:whisper_cpp/whisper_cpp.dart';
 
-const int _kConsoleWidth = 79;
-
 class WhisperConfig {
   final WhisperModelConfig modelConfig;
   final WhisperComputeConfig computeConfig;
@@ -28,13 +26,12 @@ class WhisperConfig {
   }
 
   String toLog() {
-    int columnWidth = _kConsoleWidth - 2;
-
     String logMessage = '\n';
-    logMessage += '+${''.padRight(columnWidth, '-')}+\n';
-    logMessage += '|${' model config'.padRight(columnWidth, ' ')}|';
+    logMessage += '${LogHelper.getHeader()}\n';
+    logMessage += LogHelper.parseTableHeader('model config');
     logMessage += modelConfig.toLog();
-    logMessage += '\n|${' compute config'.padRight(columnWidth, ' ')}|';
+    logMessage += '\n';
+    logMessage += LogHelper.parseTableHeader('compute config');
     logMessage += computeConfig.toLog();
 
     return logMessage;
