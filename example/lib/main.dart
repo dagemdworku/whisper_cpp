@@ -21,6 +21,7 @@ class _MyAppState extends State<MyApp> {
   final _whisperCppPlugin = WhisperCpp();
 
   late StreamSubscription<bool> _isRecordingStreamSubscription;
+  late StreamSubscription<bool> _isModelLoadedStreamSubscription;
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
   late StreamSubscription<WhisperResult?> _resultStreamSubscription;
   late StreamSubscription<List<WhisperResult>> _resultsStreamSubscription;
@@ -28,6 +29,7 @@ class _MyAppState extends State<MyApp> {
 
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
+  bool _isModelLoaded = false;
   String _statusLog = '';
   String _result = '';
 
@@ -65,6 +67,7 @@ class _MyAppState extends State<MyApp> {
             children: [
               Text('Running on: $_platformVersion\n'),
               Text('Is Recording: $_isRecording\n'),
+              Text('Is Model Loaded: $_isModelLoaded\n'),
               Text('Status: $_statusLog\n'),
               ElevatedButton(
                 onPressed: _initialize,
@@ -94,6 +97,7 @@ class _MyAppState extends State<MyApp> {
       print('config: ${config.toLog()}');
 
       _registerIsRecordingChangeListener();
+      _registerIsModelLoadedChangeListener();
       _registerStatusLogChangeListener();
       // _registerResultChangeListener();
       _registerResultsChangeListener();
@@ -110,6 +114,14 @@ class _MyAppState extends State<MyApp> {
     _isRecordingStreamSubscription =
         WhisperCpp.isRecording.listen((bool event) {
       _isRecording = event;
+      setState(() {});
+    });
+  }
+
+  void _registerIsModelLoadedChangeListener() {
+    _isModelLoadedStreamSubscription =
+        WhisperCpp.isModelLoaded.listen((bool event) {
+      _isModelLoaded = event;
       setState(() {});
     });
   }
@@ -160,6 +172,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _isRecordingStreamSubscription.cancel();
+    _isModelLoadedStreamSubscription.cancel();
     _statusLogStreamSubscription.cancel();
     _resultStreamSubscription.cancel();
     _resultsStreamSubscription.cancel();

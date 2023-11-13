@@ -63,6 +63,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         if let modelUrl {
             let result: WhisperConfig = try WhisperContext.createContext(path: modelUrl.path(), isDebug: isDebug)
             whisperContext = result.whisperContext
+            isModelLoaded = true
             messageLog += "Loaded model \(modelUrl.lastPathComponent)\n"
             statusLog = "Loaded model \(modelUrl.lastPathComponent)"
             return result
