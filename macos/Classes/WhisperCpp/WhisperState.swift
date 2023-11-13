@@ -11,7 +11,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false  // Indicates if the app is currently recording audio
     @Published var messageLog = ""  // Log of messages for debugging and user feedback
     @Published var statusLog = ""  // Log of messages for debugging and user feedback
-
+    
     @Published var result: WhisperResult?
     @Published var summary: WhisperSummary?
     
@@ -22,7 +22,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     private let recorder = Recorder()  // The audio recorder
     private var recordedFile: URL? = nil  // The URL of the recorded audio file
     private var audioPlayer: AVAudioPlayer?  // The audio player for playback of recorded audio
-
+    
     private var isDebug = false  // Indicates if the app is running in debug mode
     
     // The URL of the sample audio file
@@ -38,7 +38,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // Initialize the WhisperState
     init(modelName: String, isDebug: Bool) throws {
         super.init()
-
+        
         self.isDebug = isDebug
         
         do {
@@ -110,7 +110,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         canTranscribe = true
     }
-
+    
     func updateResult(with newValue: whisper_result) {
         self.result = WhisperResult(result: newValue)
     }
@@ -129,9 +129,6 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
             await recorder.stopRecording()
             self.statusLog = "Recorder stopped."
             isRecording = false
-            if let recordedFile {
-                await transcribeAudio(recordedFile)
-            }
         } else {
             requestRecordPermission { granted in
                 if granted {
@@ -155,6 +152,12 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
                     }
                 }
             }
+        }
+    }
+    
+    func transcribe() async{
+        if let recordedFile {
+            await transcribeAudio(recordedFile)
         }
     }
     
