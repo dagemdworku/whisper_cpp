@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
   late StreamSubscription<dynamic> _statusLogStreamSubscription;
   late StreamSubscription<List<WhisperResult>> _resultsStreamSubscription;
   late StreamSubscription<WhisperSummary?> _summaryStreamSubscription;
+  late StreamSubscription<List<double>> _samplesStreamSubscription;
 
   String _platformVersion = 'Unknown';
   bool _isRecording = false;
@@ -195,6 +196,7 @@ class _MyAppState extends State<MyApp> {
       _registerStatusLogChangeListener();
       _registerResultsChangeListener();
       _registerSummaryChangeListener();
+      _registerSamplesChangeListener();
     } on WhisperCppException catch (e) {
       print('WhisperCppException code: ${e.code}');
       print('WhisperCppException message: ${e.message}');
@@ -269,6 +271,14 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _registerSamplesChangeListener() {
+    _samplesStreamSubscription = WhisperCpp.samples.listen((
+      List<double> event,
+    ) {
+      print('received samples size: ${event.length}');
+    });
+  }
+
   @override
   void dispose() {
     _isRecordingStreamSubscription.cancel();
@@ -277,6 +287,7 @@ class _MyAppState extends State<MyApp> {
     _statusLogStreamSubscription.cancel();
     _resultsStreamSubscription.cancel();
     _summaryStreamSubscription.cancel();
+    _samplesStreamSubscription.cancel();
     super.dispose();
   }
 }
