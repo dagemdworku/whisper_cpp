@@ -14,6 +14,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     
     @Published var result: WhisperResult?
     @Published var summary: WhisperSummary?
+    @Published var samples: [Float] = []
     
     
     var whisperConfig: WhisperConfig?
@@ -81,7 +82,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
             messageLog += "Could not locate sample\n"
         }
     }
-    
+
     // Transcribe an audio file
     private func transcribeAudio(_ url: URL) async {
         if (!canTranscribe) {
@@ -93,14 +94,16 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         do {
             canTranscribe = false
-            messageLog += "Reading wave samples...\n"
+            
             statusLog = "Reading wave samples..."
+            
             let data = try readAudioSamples(url)
-            messageLog += "Transcribing data...\n"
+            
             statusLog = "Transcribing data..."
             
             summary = await whisperContext.fullTranscribe(samples: data, state: self, isDebug: isDebug)
             let text = await whisperContext.getTranscription()
+            
             messageLog += "Done: \(text)\n"
             statusLog = "Done."
         } catch {
@@ -115,6 +118,10 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
         self.result = WhisperResult(result: newValue)
     }
     
+    func updateSamples(with newValue: [Float]) {
+        self.samples = newValue
+    }
+    
     // Read audio samples from a file
     private func readAudioSamples(_ url: URL) throws -> [Float] {
         stopPlayback()
@@ -125,7 +132,7 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
     // Toggle recording state
     func toggleRecord() async {
         if isRecording {
-            self.statusLog = "Stpoing recorder..."
+            self.statusLog = "Stopping recorder..."
             await recorder.stopRecording()
             self.statusLog = "Recorder stopped."
             isRecording = false
@@ -134,13 +141,13 @@ class WhisperState: NSObject, ObservableObject, AVAudioRecorderDelegate {
                 if granted {
                     Task {
                         do {
-                            self.statusLog = "Stoping playback..."
+                            self.statusLog = "Stopping playback..."
                             self.stopPlayback()
                             self.statusLog = "Playback stopped."
                             let file = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                                 .appending(path: "output.wav")
                             self.statusLog = "Starting recorder..."
-                            try await self.recorder.startRecording(toOutputFile: file, delegate: self)
+                            try await self.recorder.startRecording(toOutputFile: file, delegate: self, updateSamples: self.updateSamples)
                             self.statusLog = "Recording..."
                             self.isRecording = true
                             self.recordedFile = file
