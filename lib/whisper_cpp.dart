@@ -37,6 +37,10 @@ class WhisperCpp {
     return WhisperCppPlatform.instance.summary;
   }
 
+  static Stream<List<double>> get samples {
+    return WhisperCppPlatform.instance.samples;
+  }
+
   Future<String?> getPlatformVersion() {
     return WhisperCppPlatform.instance.getPlatformVersion();
   }

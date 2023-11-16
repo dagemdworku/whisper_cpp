@@ -4,9 +4,10 @@ import AVFoundation
 /// `Recorder` is an actor class that manages audio recording using `AVAudioRecorder`.
 actor Recorder {
     // MARK: - Properties
-    
-    /// The audio recorder instance.
     private var recorder: AVAudioRecorder?
+    private var audioEngine: AVAudioEngine?
+    private var nodeTap: Any?
+    let bufferSize: AVAudioFrameCount = 1024
     
     /// Custom error type for handling recorder related errors.
     enum RecorderError: Error {
@@ -22,7 +23,8 @@ actor Recorder {
     ///   - url: The output file URL where the audio will be recorded.
     ///   - delegate: The delegate that will respond to recording events.
     /// - Throws: `RecorderError.couldNotStartRecording` if the recording could not be started.
-    func startRecording(toOutputFile url: URL, delegate: AVAudioRecorderDelegate?) throws {
+    func startRecording(toOutputFile url: URL, delegate: AVAudioRecorderDelegate?, updateSamples: @MainActor @escaping (_: [Float])->()) throws {
+        
         // Define the recording settings.
         let recordSettings: [String : Any] = [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
@@ -47,12 +49,36 @@ actor Recorder {
         
         // Store the recorder instance.
         self.recorder = recorder
+        
+        // Initialize and start the audio engine for real-time processing
+        self.audioEngine = AVAudioEngine()
+        guard let audioEngine = self.audioEngine else { return }
+        let inputNode = audioEngine.inputNode
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        
+        nodeTap = inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { (buffer, time) in
+            let ptr = buffer.floatChannelData![0]
+            let array = Array(UnsafeBufferPointer(start: ptr, count: Int(buffer.frameLength)))
+            Task {                
+                await updateSamples(array)
+            }
+        }
+        
+        try audioEngine.start()
     }
+    
+    
     
     /// Stops the current recording if any.
     func stopRecording() {
         // Stop the recording and release the recorder instance.
-        recorder?.stop()
         recorder = nil
+        recorder?.stop()
+        
+        // Stop the audio engine and remove the tap
+        audioEngine?.inputNode.removeTap(onBus: 0)
+        audioEngine?.stop()
+        audioEngine = nil
+        nodeTap = nil
     }
 }

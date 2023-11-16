@@ -8,6 +8,7 @@ let kFLTWhisperCppCanTranscribeEvent = "whisper_cpp_can_transcribe_event"
 let kFLTWhisperCppStatusLogEvent = "whisper_cpp_status_log_event"
 let kFLTWhisperCppResultEvent = "whisper_cpp_result_event"
 let kFLTWhisperCppSummaryEvent = "whisper_cpp_summary_event"
+let kFLTWhisperCppSamplesEvent = "whisper_cpp_samples_event"
 
 public class WhisperCppPlugin: NSObject, FlutterPlugin {
     private var whisperState: WhisperState?
@@ -60,23 +61,19 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
             do {
                 whisperState = try WhisperState(modelName: modelName, isDebug: isDebug)
                 
-                registerIsRecordingEventChannel(whisperState: whisperState!)
-                registerIsModelLoadedEventChannel(whisperState: whisperState!)
-                registerCanTranscribeEventChannel(whisperState: whisperState!)
-                registerStatusLogEventChannel(whisperState: whisperState!)
-                registerResultEventChannel(whisperState: whisperState!)
-                registerSummaryEventChannel(whisperState: whisperState!)
-                
                 let whisperConfigDict: [String: Any] = [
                     "modelConfig": whisperState!.whisperConfig!.modelConfig.toDictionary(),
                     "computeConfig": whisperState!.whisperConfig!.computeConfig.toDictionary()
                 ]
+                
+                registerEventChannels(whisperState: whisperState);
                 
                 result(whisperConfigDict)
             } catch {
                 result(flutterError(from: error))
             }
         } else {
+            registerEventChannels(whisperState: whisperState);
             result(whisperCppError(from: WhisperCppError.alreadyInitialized))
         }
     }
@@ -109,6 +106,18 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
                 }
             }
         }
+    }
+    
+    private func registerEventChannels(whisperState: WhisperState?){
+        if(whisperState == nil) { return; }
+        
+        registerIsRecordingEventChannel(whisperState: whisperState!)
+        registerIsModelLoadedEventChannel(whisperState: whisperState!)
+        registerCanTranscribeEventChannel(whisperState: whisperState!)
+        registerStatusLogEventChannel(whisperState: whisperState!)
+        registerResultEventChannel(whisperState: whisperState!)
+        registerSummaryEventChannel(whisperState: whisperState!)
+        registerSamplesEventChannel(whisperState: whisperState!)
     }
     
     private func registerIsRecordingEventChannel(whisperState: WhisperState) {
@@ -145,6 +154,12 @@ public class WhisperCppPlugin: NSObject, FlutterPlugin {
         let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppSummaryEvent
         let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
         eventChannel.setStreamHandler(SummaryStreamHandler(whisperState: whisperState))
+    }
+
+    private func registerSamplesEventChannel(whisperState: WhisperState) {
+        let eventChannelName = kFLTWhisperCppMethodChannelName + "/token/" + kFLTWhisperCppSamplesEvent
+        let eventChannel = FlutterEventChannel(name: eventChannelName, binaryMessenger: messenger)
+        eventChannel.setStreamHandler(SamplesStreamHandler(whisperState: whisperState))
     }
     
     private func flutterError(from error: Error) -> FlutterError {

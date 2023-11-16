@@ -11,6 +11,7 @@ const String _kCanTranscribeEvent = 'whisper_cpp_can_transcribe_event';
 const String _kStatusLogEvent = 'whisper_cpp_status_log_event';
 const String _kResultEvent = 'whisper_cpp_result_event';
 const String _kSummaryEvent = 'whisper_cpp_summary_event';
+const String _kSamplesEvent = 'whisper_cpp_samples_event';
 
 /// An implementation of [WhisperCppPlatform] that uses method channels.
 class MethodChannelWhisperCpp extends WhisperCppPlatform {
@@ -35,6 +36,9 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
 
   final EventChannel summaryEventChannel =
       const EventChannel('$_kMethodChannelName/token/$_kSummaryEvent');
+
+  final EventChannel samplesEventChannel =
+      const EventChannel('$_kMethodChannelName/token/$_kSamplesEvent');
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -118,6 +122,15 @@ class MethodChannelWhisperCpp extends WhisperCppPlatform {
   Stream<WhisperSummary?> get summary {
     return summaryEventChannel.receiveBroadcastStream().map((event) {
       return event is Map ? WhisperSummary.fromJson(event) : null;
+    });
+  }
+
+  @override
+  Stream<List<double>> get samples {
+    return samplesEventChannel.receiveBroadcastStream().map((event) {
+      return event is List<Object?>
+          ? event.map((e) => (e is num) ? e.toDouble() : 0.0).toList()
+          : [];
     });
   }
 }
